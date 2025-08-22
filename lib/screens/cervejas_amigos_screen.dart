@@ -10,8 +10,9 @@ import 'detalhe_cervejas_amigos.dart';
 class TelaCervejasAmigos extends StatefulWidget {
   final String? idCervejeiro;
   final void Function()? onVoltar;
+  final String origem;
 
-  const TelaCervejasAmigos({super.key, this.idCervejeiro, this.onVoltar});
+  const TelaCervejasAmigos({super.key, this.idCervejeiro, this.onVoltar, this.origem = "menu"});
 
   @override
   State<TelaCervejasAmigos> createState() => _TelaCervejasAmigosState();
@@ -49,6 +50,27 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
     }
   }
 
+  void _voltar() {
+    if (widget.onVoltar != null) {
+      widget.onVoltar!();
+      return;
+    }
+
+    switch (widget.origem) {
+      case "menu":
+        Navigator.of(context).pushReplacementNamed('/menuPrincipal');
+        break;
+      case "amigos":
+        Navigator.of(context).pushReplacementNamed('/explorarCervejeiros');
+        break;
+      case "notificacoes":
+        Navigator.of(context).pushReplacementNamed('/notificacoes');
+        break;
+      default:
+        Navigator.of(context).pop();
+    }
+  }  
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<CervejaAmigosProvider>(context);
@@ -63,12 +85,19 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cervejas dos Amigos'),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: const Text(
+            'Cervejas dos Amigos',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            widget.onVoltar?.call();
-          },
+          onPressed: _voltar,
         ),
         actions: temCervejas
             ? [

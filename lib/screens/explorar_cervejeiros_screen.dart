@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../services/cervejeiro_provider.dart';
 
 import 'detalhes_cervejeiro_screen.dart';
+import 'cervejas_amigos_screen.dart';
 
 class ExplorarCervejeirosScreen extends StatefulWidget {
   final void Function(String idCervejeiro)? onVerCervejasDoAmigo;
@@ -81,7 +82,13 @@ class _ExplorarCervejeirosScreenState extends State<ExplorarCervejeirosScreen> {
         title: const Text('Cervejeiros'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => widget.onVoltar?.call(),
+          onPressed: () {
+            if (widget.onVoltar != null) {
+              widget.onVoltar!();
+            } else {
+              Navigator.of(context).pushReplacementNamed('/menuPrincipal');
+            }
+          },
         ),
         actions: [_menuFiltroEstado(context)],
       ),
@@ -308,7 +315,8 @@ class _ExplorarCervejeirosScreenState extends State<ExplorarCervejeirosScreen> {
               colorFilter: const ColorFilter.mode(Colors.brown, BlendMode.srcIn),
             ),
             tooltip: 'Ver cervejas do amigo',
-            onPressed: () => widget.onVerCervejasDoAmigo?.call(cervejeiro.id),
+            //onPressed: () => widget.onVerCervejasDoAmigo?.call(cervejeiro.id),
+            onPressed: () { Navigator.push( context, MaterialPageRoute( builder: (_) => TelaCervejasAmigos( idCervejeiro: cervejeiro.id, origem: "amigos", ),),);},
           ),
           IconButton(
             icon: SvgPicture.asset(

@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../services/perfil_provider.dart';
 import '../services/cervejeiro_provider.dart';
 import '../services/cerveja_provider.dart';
+import '../services/notificacao_provider.dart';
 import '../services/cerveja_amigos_provider.dart';
 
 import '../screens/auth_screen.dart';
@@ -47,8 +48,15 @@ class MenuPrincipalState extends State<MenuPrincipal> {
   @override
   void initState() {
     super.initState();
-    carregarPerfil();
+    carregarPerfil().then((_) => carregarBadgeNotificacoes());
   }
+
+  Future<void> carregarBadgeNotificacoes() async {
+    final idUsuario = context.read<PerfilProvider>().id;
+    if (idUsuario != null && idUsuario.isNotEmpty) {
+      await context.read<NotificacaoProvider>().carregarNotificacoes(idUsuario);
+    }
+  }  
 
   Future<void> carregarPerfil() async {
     final perfilProvider = context.read<PerfilProvider>();
@@ -129,8 +137,6 @@ class MenuPrincipalState extends State<MenuPrincipal> {
     final cervejaAmigosProvider = context.read<CervejaAmigosProvider>();
     cervejaAmigosProvider.limparFiltros();
 
-    // Ajuste aqui para o nome real do método de filtro no seu provider, se diferente:
-    // Ex.: aplicarFiltroPorCervejeiro / selecionarCervejeiro / setAmigoSelecionado
     cervejaAmigosProvider.aplicarFiltroPorIdCervejeiro(idCervejeiro);
 
     await cervejaAmigosProvider.carregarCervejasDosAmigos();
@@ -198,7 +204,42 @@ class MenuPrincipalState extends State<MenuPrincipal> {
         'indice': 4
       },
       {
-        'icone': const Icon(Icons.notifications, size: 96),
+        'icone': Selector<NotificacaoProvider, int>(
+          selector: (_, p) => p.naoLidas,
+          builder: (_, count, __) {
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.notifications, size: 96),
+                if (count > 0)
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
+                      child: Text(
+                        count > 99 ? '99+' : '$count',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
         'titulo': 'Notificações',
         'indice': 5
       },
@@ -324,13 +365,14 @@ class MenuPrincipalState extends State<MenuPrincipal> {
           );
         case 4:
           return TelaCervejasAmigos(
-            onVoltar: () => setState(() => _indiceAtual = _indiceRetornoPesquisar),
+            origem: "menu",
           );
         case 5:
-          final idUsuario = context.watch<PerfilProvider>().id!; // ajuste conforme nome do campo no seu provider
+          final idUsuario = context.watch<PerfilProvider>().id!;
           return TelaNotificacoes(
             idUsuarioLogado: idUsuario,
-            onVoltar: () => setState(() => _indiceAtual = 0));
+            onVoltar: () => setState(() => _indiceAtual = 0),
+            onAbrirCervejasDoAmigo: (idCervejeiro) => verCervejasDoAmigo(idCervejeiro),);
         case 6:
           return PerfilScreen(onVoltar: () => setState(() => _indiceAtual = 0));
         default:

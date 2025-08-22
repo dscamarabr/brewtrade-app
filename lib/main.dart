@@ -14,6 +14,7 @@ import 'screens/minhas_cervejas.dart';
 import 'screens/explorar_cervejeiros_screen.dart';
 import 'screens/cervejas_amigos_screen.dart';
 import 'screens/menu_principal.dart';
+import 'screens/notificacoes_screen.dart';
 
 // Providers
 import 'services/cerveja_provider.dart';
@@ -148,6 +149,12 @@ class BrewTradeApp extends StatelessWidget {
             '/explorarCervejeiros': (context) =>
                 const ExplorarCervejeirosScreen(),
             '/cervejasAmigos': (context) => const TelaCervejasAmigos(),
+            '/notificacoes': (context) {
+                final user = Supabase.instance.client.auth.currentUser;
+                return TelaNotificacoes(
+                  idUsuarioLogado: user?.id ?? '',
+                );
+              },
           },
           onGenerateRoute: (settings) {
             if (settings.name == '/cadastroCerveja' &&

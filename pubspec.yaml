@@ -44,6 +44,7 @@ flutter:
     - assets/icon.png
     - assets/imagem_padrao.png
     - assets/sem_cervejeiros.png
+    - assets/sem_notificacoes.png
     - assets/sem_cervejas.png
     - assets/icons/cervejeiros.svg
     - assets/icons/instagram.svg
