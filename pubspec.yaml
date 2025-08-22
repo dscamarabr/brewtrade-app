@@ -1,0 +1,70 @@
+name: brewtrade_app
+description: "Plataforma cervejeira BrewTrade"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  supabase_flutter: ^2.9.1
+  flutter_multi_formatter: ^2.4.0
+  image_picker: ^1.0.4
+  path: ^1.8.3
+  provider: ^6.0.5
+  shared_preferences: ^2.2.2
+  auto_size_text: ^3.0.0
+  flutter_svg: ^2.2.0
+  url_launcher: ^6.2.4
+  firebase_messaging: ^16.0.0
+  firebase_core: ^4.0.0
+  http: ^1.2.1
+  flutter_local_notifications: ^17.2.2
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png" 
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/email_confirmation.png
+    - assets/geladeira_vazia.png
+    - assets/icon.png
+    - assets/imagem_padrao.png
+    - assets/sem_cervejeiros.png
+    - assets/sem_cervejas.png
+    - assets/icons/cervejeiros.svg
+    - assets/icons/instagram.svg
+    - assets/icons/whatsapp.svg
+    - assets/icons/detalhes_cerveja.svg
+    - assets/icons/minhas_cervejas.svg
+    - assets/icons/garrafa_cerveja.svg
+    - assets/icons/pesquisar_cerveja.svg
+    - assets/icons/cadastrar-cerveja.svg
+    - assets/icons/lista_cervejas.svg
+    - assets/icons/apagar_cerveja.svg
+    - assets/icons/editar_cerveja.svg
+    - assets/icons/lupulo.svg
+    - assets/icons/desfazer_amizade.svg
+    - assets/icons/criar_amizade.svg
+    - assets/icons/aguardar_solicitacao_amizade.svg
+    - assets/icons/cancelar_solicitacao_amizade.svg
+    - assets/icons/aceitar_solicitacao_amizade.svg
+    - assets/icons/recusar_solicitacao_amizade.svg
+    - assets/icons/recusado_amizade.svg
+    - assets/icons/abv.svg
+    - assets/icons/cervejaria.svg
+    - assets/icons/estilo_cerveja.svg
+    - assets/icons/quantidade_cervejas.svg

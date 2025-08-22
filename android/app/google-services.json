@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "110761656450",
+    "project_id": "brewtrade-f1cf5",
+    "storage_bucket": "brewtrade-f1cf5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:110761656450:android:7fca15e849d03d9cfc749b",
+        "android_client_info": {
+          "package_name": "com.example.brewtrade_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGcjpu3rkZMi7uFcwdnFoTm0NSajpAvls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
