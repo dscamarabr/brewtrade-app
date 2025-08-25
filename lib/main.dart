@@ -51,6 +51,56 @@ Future<void> _initNotifications() async {
       ?.createNotificationChannel(kChannel);
 }
 
+Future<void> abrirTelaPorNotificacao({
+  required int? idNotificacao,
+  required Widget tela,
+}) async {
+  if (idNotificacao != null) {
+    try {
+      await navigatorKey.currentContext!
+          .read<NotificacaoProvider>()
+          .marcarComoLida(idNotificacao);
+    } catch (e) {
+      debugPrint('Erro ao marcar notificação como lida: $e');
+    }
+  }
+
+  navigatorKey.currentState?.push(
+    MaterialPageRoute(builder: (_) => tela),
+  );
+}
+
+void _abrirTelaPorTipo(String? tipo, String idCervejeiro, int? idNotificacao) {
+  final tipoNormalizado = tipo?.toLowerCase().replaceAll('_', ' ').trim();
+
+  switch (tipoNormalizado) {
+    case 'envio convite':
+    case 'aceite convite':
+      abrirTelaPorNotificacao(
+        idNotificacao: idNotificacao,
+        tela: ExplorarCervejeirosScreen(
+          onVoltar: () {
+            navigatorKey.currentState?.pushReplacementNamed('/notificacoes');
+          },
+        ),
+      );
+      break;
+
+    case 'cadastro cerveja':
+      abrirTelaPorNotificacao(
+        idNotificacao: idNotificacao,
+        tela: TelaCervejasAmigos(
+          idCervejeiro: idCervejeiro,
+          origem: "notificacoes",
+        ),
+      );
+      break;
+
+    default:
+      navigatorKey.currentState?.pushNamed('/notificacoes');
+  }
+}
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
@@ -68,6 +118,29 @@ Future<void> main() async {
   );
 
   await _initNotifications();
+
+  // 🔔 Trata notificação que abriu o app fechado
+  final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+  if (initialMessage != null) {
+    final idCervejeiro = initialMessage.data['usuario_id'];
+    final idNotificacao = int.tryParse(initialMessage.data['id_notificacao'] ?? '');
+    final tipo = initialMessage.data['tipo'];
+
+    if (idCervejeiro != null) {
+      _abrirTelaPorTipo(tipo, idCervejeiro, idNotificacao);
+    }
+  }
+
+  // 🔔 Trata notificação com app em segundo plano
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    final idCervejeiro = message.data['usuario_id'];
+    final idNotificacao = int.tryParse(message.data['id_notificacao'] ?? '');
+    final tipo = message.data['tipo'];
+
+    if (idCervejeiro != null) {
+      _abrirTelaPorTipo(tipo, idCervejeiro, idNotificacao);
+    }
+  });
 
   // Listener para mensagens em primeiro plano
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -88,19 +161,6 @@ Future<void> main() async {
             priority: Priority.high,
             icon: android.smallIcon,
           ),
-        ),
-      );
-    }
-  });
-
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    final data = message.data;
-    final idCervejeiro = data['usuario_id'];
-
-    if (idCervejeiro != null) {
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(
-          builder: (_) => TelaCervejasAmigos(idCervejeiro: idCervejeiro),
         ),
       );
     }

@@ -3,8 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 import '../services/notificacao_provider.dart';
-import '../models/notificacao.dart';
 import 'cervejas_amigos_screen.dart';
+import 'explorar_cervejeiros_screen.dart';
+import '../main.dart';
 
 class TelaNotificacoes extends StatefulWidget {
   final String idUsuarioLogado;
@@ -98,7 +99,6 @@ class _TelaNotificacoesState extends State<TelaNotificacoes> {
                   PopupMenuItem(value: 'Todos', child: Text('Todos')),
                   PopupMenuItem(value: 'amizade', child: Text('Amizade')),
                   PopupMenuItem(value: 'cadastro cerveja', child: Text('Cerveja')),
-                  PopupMenuItem(value: 'evento', child: Text('Evento')),
                 ],
               ),
               PopupMenuButton<String>(
@@ -144,15 +144,39 @@ class _TelaNotificacoesState extends State<TelaNotificacoes> {
                               horizontal: 12, vertical: 6),
                           child: ListTile(
                             onTap: () {
-                              // Marca como lida
+                              // Marca como lida, se aplicável
                               if (notif.lidoEm == null) {
                                 provider.marcarComoLida(notif.id);
                               }
 
-                              // Abre a tela de cervejas via callback do MenuPrincipal
-                              if (notif.tipo.toLowerCase() == 'cadastro cerveja') {
-                                //widget.onAbrirCervejasDoAmigo?.call(notif.idRemetente!);
-                                Navigator.push(context,MaterialPageRoute(builder: (_) => TelaCervejasAmigos(idCervejeiro: notif.idRemetente,origem: "notificacoes",),),);
+                              // Verifica se é notificação de amizade
+                              if (notif.tipo.toLowerCase() == 'amizade' ||
+                                  notif.tipo.toLowerCase() == 'envio convite' ||
+                                  notif.tipo.toLowerCase() == 'aceite convite') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ExplorarCervejeirosScreen(
+                                      onVoltar: () {
+                                        navigatorKey.currentState
+                                            ?.pushReplacementNamed('/notificacoes');
+                                      },
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              // Continua tratando outros tipos (ex: cadastro cerveja)
+                              else if (notif.tipo.toLowerCase() == 'cadastro cerveja') {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => TelaCervejasAmigos(
+                                      idCervejeiro: notif.idRemetente,
+                                      origem: "notificacoes",
+                                    ),
+                                  ),
+                                );
                               }
                             },
                             title: Text(

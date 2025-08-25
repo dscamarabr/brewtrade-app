@@ -79,7 +79,7 @@ class _ExplorarCervejeirosScreenState extends State<ExplorarCervejeirosScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cervejeiros'),
+        title: const Text('Cervejeiros Amigos'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {

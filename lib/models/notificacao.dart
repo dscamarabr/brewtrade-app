@@ -1,3 +1,13 @@
+import 'package:flutter/material.dart';
+
+class TipoNotificacao {
+  static const cadastroCerveja = 'Cadastro Cerveja';
+  static const envioConvite = 'Envio Convite';
+  static const aceiteConvite = 'Aceite Convite';
+  static const recusaConvite = 'Recusa Convite';
+  static const cancelarConvite = 'Cancelar Convite';
+}
+
 class NotificacaoModel {
   final int id;
   final String tipo;
@@ -31,4 +41,22 @@ class NotificacaoModel {
       idDestinatario: json['id_usuario_destinatario'],
     );
   }
+
+  IconData get icone {
+    switch (tipo) {
+      case TipoNotificacao.envioConvite:
+        return Icons.mail_outline;
+      case TipoNotificacao.aceiteConvite:
+        return Icons.check_circle_outline;
+      case TipoNotificacao.recusaConvite:
+        return Icons.cancel_outlined;
+      case TipoNotificacao.cancelarConvite:
+        return Icons.close;
+      case TipoNotificacao.cadastroCerveja:
+        return Icons.local_drink_outlined;
+      default:
+        return Icons.notifications;
+    }
+  }
+
 }

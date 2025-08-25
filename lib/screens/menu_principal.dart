@@ -200,7 +200,7 @@ class MenuPrincipalState extends State<MenuPrincipal> {
             BlendMode.srcIn,
           ),
         ),
-        'titulo': 'Pesquisar Cervejas',
+        'titulo': 'Cervejas dos Amigos',
         'indice': 4
       },
       {

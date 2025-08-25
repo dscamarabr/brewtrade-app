@@ -15,16 +15,13 @@ class NotificacaoProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  int get naoLidas => _notificacoes.where((n) => n.lidoEm == null).length;
+  int get naoLidas => _todasNotificacoes.where((n) => n.lidoEm == null).length;
 
   /// Carrega notificações do usuário logado
   Future<void> carregarNotificacoes(String idUsuarioLogado) async {
     _isLoading = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
+    notifyListeners();
 
-    // Buscar amigos aceitos
     final amigos = await _client
         .from('v_amigos_aceitos')
         .select('amigo_id')
@@ -34,15 +31,39 @@ class NotificacaoProvider with ChangeNotifier {
         .map((a) => a['amigo_id'] as String)
         .toList();
 
-    // Buscar notificações
+    // Monta o filtro para amigos apenas se existir pelo menos 1
+    final amigosFiltro = idsAmigos.isNotEmpty
+        ? 'id_usuario_remetente.in.(${idsAmigos.join(",")})'
+        : '';
+
+    // Sempre incluir convites
+    const convitesFiltro = 'tp_notificacao.in.("Envio Convite","Aceite Convite")';
+
+    // Junta os filtros, removendo partes vazias
+    final filtroFinal = [amigosFiltro, convitesFiltro]
+        .where((f) => f.isNotEmpty)
+        .join(',');
+
     final data = await _client
         .from('vw_notificacoes_com_remetente')
         .select()
         .eq('id_usuario_destinatario', idUsuarioLogado)
-        .inFilter('id_usuario_remetente', idsAmigos)
-        .order('criado_em', ascending: false);
+        .or(filtroFinal);
 
-    _todasNotificacoes = (data as List)
+    // Normaliza convites como 'amizade'
+    final normalizados = (data as List).map((json) {
+      final tipo = (json['tp_notificacao'] as String?)?.toLowerCase();
+      if (tipo == 'envio convite' || tipo == 'aceite convite') {
+        json['tp_notificacao'] = 'amizade';
+      }
+      return json;
+    }).toList();
+
+    // Ordena por criado_em
+    normalizados.sort((a, b) => DateTime.parse(b['criado_em'])
+        .compareTo(DateTime.parse(a['criado_em'])));
+
+    _todasNotificacoes = normalizados
         .map((json) => NotificacaoModel.fromJson(json))
         .toList();
 
@@ -100,11 +121,13 @@ class NotificacaoProvider with ChangeNotifier {
 
   /// Filtro separado por tipo
   void filtrarPorTipo(String tipo) {
-    _notificacoes = _todasNotificacoes.where((n) {
-      return tipo.isEmpty || tipo == 'Todos'
-          ? true
-          : n.tipo.toLowerCase() == tipo.toLowerCase();
-    }).toList();
+    if (tipo == 'Todos') {
+      _notificacoes = List.from(_todasNotificacoes);
+    } else {
+      _notificacoes = _todasNotificacoes
+          .where((n) => n.tipo.toLowerCase() == tipo.toLowerCase())
+          .toList();
+    }
     notifyListeners();
   }
 
@@ -134,7 +157,7 @@ class NotificacaoProvider with ChangeNotifier {
         idsAdicionados.add(n.idRemetente);
         lista.add({
           'id': n.idRemetente,
-          'nome': n.nomeRemetente ?? 'Remetente desconhecido',
+          'nome': n.nomeRemetente,
         });
       }
     }
