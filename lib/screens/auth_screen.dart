@@ -267,47 +267,124 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              isLogin ? 'Login BrewTrade 🍺' : 'Criar Conta BrewTrade 🍻',
-              style: const TextStyle(fontSize: 22),
-            ),
-            const SizedBox(height: 20),
-            CustomEmailField(controller: emailController),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Senha'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: loading ? null : _handleAuth,
-              child: Text(
-                loading ? 'Carregando...' : (isLogin ? 'Entrar' : 'Criar Conta'),
+      backgroundColor: theme.colorScheme.surfaceVariant,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset('assets/login.png', fit: BoxFit.contain),
               ),
             ),
-            TextButton(
-              onPressed: () => setState(() => isLogin = !isLogin),
-              child: Text(isLogin ? 'Ainda não tem conta? Criar' : 'Já tem conta? Entrar'),
-            ),
-            if (isLogin)
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RecuperarSenhaScreen(email: emailController.text.trim()),
-                    ),
-                  );
-                },
-                child: const Text('Esqueceu sua senha? 🔑'),
+              const SizedBox(height: 32),
+              Text(
+                isLogin ? 'Login BrewTrade 🍺' : 'Criar Conta BrewTrade 🍻',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
               ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                isLogin
+                    ? 'Entre para explorar o mundo BrewTrade'
+                    : 'Junte-se a nós e comece agora',
+                style: theme.textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      CustomEmailField(controller: emailController),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: passwordController,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          prefixIcon: Icon(Icons.lock_outline),
+                          labelText: 'Senha',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      if (isLogin)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => RecuperarSenhaScreen(
+                                    email: emailController.text.trim(),
+                                  ),
+                                ),
+                              );
+                            },
+                            child: const Text('Esqueceu sua senha? 🔑'),
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: loading ? null : _handleAuth,
+                          style: ElevatedButton.styleFrom(
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            loading
+                                ? 'Carregando...'
+                                : (isLogin ? 'Entrar' : 'Criar Conta'),
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton(
+                        onPressed: () =>
+                            setState(() => isLogin = !isLogin),
+                        child: Text(
+                          isLogin
+                              ? 'Ainda não tem conta? Criar'
+                              : 'Já tem conta? Entrar',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

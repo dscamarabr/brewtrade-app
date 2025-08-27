@@ -46,6 +46,10 @@ flutter:
     - assets/sem_cervejeiros.png
     - assets/sem_notificacoes.png
     - assets/sem_cervejas.png
+    - assets/doacao.png
+    - assets/contato.png
+    - assets/login.png
+    - assets/recuperar_senha.png
     - assets/icons/cervejeiros.svg
     - assets/icons/instagram.svg
     - assets/icons/whatsapp.svg

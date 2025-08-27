@@ -16,6 +16,8 @@ import '../screens/cadastro_cerveja.dart';
 import '../screens/explorar_cervejeiros_screen.dart';
 import '../screens/cervejas_amigos_screen.dart';
 import '../screens/notificacoes_screen.dart';
+import '../screens/doacao.dart';
+import '../screens/contato.dart';
 
 class MenuPrincipal extends StatefulWidget {
   @override
@@ -388,13 +390,15 @@ class MenuPrincipalState extends State<MenuPrincipal> {
         onTap: (index) {
           switch (index) {
             case 0:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Funcionalidade de Doação em desenvolvimento!')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TelaDoacao()),
               );
               break;
             case 1:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Funcionalidade de Contato em desenvolvimento!')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TelaContato()),
               );
               break;
           }
