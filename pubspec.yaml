@@ -50,6 +50,7 @@ flutter:
     - assets/contato.png
     - assets/login.png
     - assets/recuperar_senha.png
+    - assets/confirmacao_email.png
     - assets/icons/cervejeiros.svg
     - assets/icons/instagram.svg
     - assets/icons/whatsapp.svg
@@ -72,4 +73,4 @@ flutter:
     - assets/icons/abv.svg
     - assets/icons/cervejaria.svg
     - assets/icons/estilo_cerveja.svg
-    - assets/icons/quantidade_cervejas.svg
+    - assets/icons/quantidade_cervejas.svg 

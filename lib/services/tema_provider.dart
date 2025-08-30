@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../models/temas.dart';
 
 class TemaProvider extends ChangeNotifier {
-  ThemeData _temaAtual = temaPilsen;
-  String _temaNome = 'pilsen';
+  ThemeData _temaAtual = temaIPA;
+  String _temaNome = 'ipa';
 
   ThemeData get temaAtual => _temaAtual;
   String get temaNome => _temaNome;
@@ -12,7 +12,8 @@ class TemaProvider extends ChangeNotifier {
   Future<void> carregarTemaSalvo() async {
     final prefs = await SharedPreferences.getInstance();
     final temaSalvo = prefs.getString('temaSelecionado') ?? 'pilsen';
-    aplicarTemaPorNome(temaSalvo);
+    //aplicarTemaPorNome(temaSalvo); desativado enquanto usamos apenas um tema
+    aplicarTemaPorNome('ipa');
   }
 
   void aplicarTemaPorNome(String nome) async {

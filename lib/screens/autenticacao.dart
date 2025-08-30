@@ -8,9 +8,9 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'package:brewtrade_app/widgets/CustomEmailField.dart';
-import 'package:brewtrade_app/screens/email_confirmation_screen.dart';
+import 'package:brewtrade_app/screens/confirmacao_email.dart';
 import 'package:brewtrade_app/screens/menu_principal.dart';
-import 'package:brewtrade_app/screens/recuperar_senha_screen.dart';
+import 'package:brewtrade_app/screens/recuperar_senha.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});

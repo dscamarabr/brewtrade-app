@@ -209,16 +209,87 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 decoration: const InputDecoration(labelText: 'Cervejaria'),
               ),
               TextFormField(
+                controller: redeSocialController,
+                decoration: InputDecoration(labelText: 'Perfil Instagram'),
+              ),
+              TextFormField(
                 controller: bioController,
                 decoration: InputDecoration(labelText: 'Bio'),
                 maxLines: 2,
               ),
-              TextFormField(
-                controller: redeSocialController,
-                decoration: InputDecoration(labelText: 'Perfil Instagram'),
-              ),
               const SizedBox(height: 20),
-              Center(
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                margin: const EdgeInsets.symmetric(vertical: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Foto de Perfil',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12), // leve arredondamento
+                              image: DecorationImage(
+                                image: perfilProvider.fotoUrl?.isNotEmpty == true
+                                    ? NetworkImage(perfilProvider.fotoUrl!)
+                                    : const AssetImage('assets/imagem_padrao.png') as ImageProvider,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          if (perfilProvider.fotoUrl?.isNotEmpty == true)
+                            Positioned(
+                              top: -6,
+                              right: -6,
+                              child: GestureDetector(
+                                onTap: () => perfilProvider.removerFoto(),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  padding: const EdgeInsets.all(4),
+                                  child: const Icon(Icons.close, color: Colors.white, size: 18),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton.icon(
+                        onPressed: () async {
+                          final url = await _selecionarImagem();
+                          if (url != null) {
+                            perfilProvider.atualizarFoto(url);
+                            final userId = Supabase.instance.client.auth.currentUser?.id;
+                            if (userId != null) {
+                              await Supabase.instance.client
+                                  .from('tb_cervejeiro')
+                                  .update({'fotoUrl': url})
+                                  .eq('id', userId);
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.photo),
+                        label: const Text('Selecionar imagem'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+/*               Center(
                 child: Column(
                   children: [
                     const Text(
@@ -296,76 +367,8 @@ class _PerfilScreenState extends State<PerfilScreen> {
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-              Center(
-                child: Text(
-                  'Foto do Perfil',
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Center(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(60),
-                      child: SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: perfilProvider.fotoUrl?.isNotEmpty == true
-                            ? Image.network(
-                                perfilProvider.fotoUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(Icons.broken_image, size: 80);
-                                },
-                              )
-                            : Image.asset(
-                                'assets/imagem_padrao.png',
-                                fit: BoxFit.cover,
-                              ),
-                      ),
-                    ),
-                    if (perfilProvider.fotoUrl?.isNotEmpty == true)
-                      Positioned(
-                        top: -6,
-                        right: -6,
-                        child: GestureDetector(
-                          onTap: () => perfilProvider.removerFoto(),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
-                            ),
-                            padding: const EdgeInsets.all(4),
-                            child: const Icon(Icons.close, color: Colors.white, size: 18),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () async {
-                  final url = await _selecionarImagem();
-                  if (url != null) {
-                    perfilProvider.atualizarFoto(url);
-
-                    final userId = Supabase.instance.client.auth.currentUser?.id;
-                    if (userId != null) {
-                      await Supabase.instance.client
-                        .from('tb_cervejeiro')
-                        .update({'fotoUrl': url})
-                        .eq('id', userId);
-                    }
-                  }
-                },
-                icon: const Icon(Icons.photo),
-                label: const Text('Selecionar imagem'),
-              ),
-              const SizedBox(height: 16),
+              ), */
+              const SizedBox(height: 24),              
               CheckboxListTile(
                 title: const Text('Receber notificações'),
                 value: perfilProvider.permiteNotificacoes,
@@ -385,41 +388,38 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 },
               ),
               const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: loading ? null : _salvarOuEditarPerfil,
-                icon: loading 
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Icon(Icons.save_alt),
-                label: Text(
-                  loading ? 'Salvando...' : 'Salvar Perfil',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.1,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade600,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 6,
-                  shadowColor: Colors.grey.shade500,
-                ),
-              ),
             ],
           ),
         ),
       ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        child: ElevatedButton.icon(
+          onPressed: loading ? null : _salvarOuEditarPerfil,
+          icon: loading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(Icons.save_alt),
+          label: Text(
+            loading ? 'Salvando...' : 'Salvar Perfil',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green.shade600,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ),      
     );
   }
 }

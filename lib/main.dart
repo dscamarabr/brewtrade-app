@@ -7,14 +7,14 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'firebase_options.dart';
 
 // Screens
-import 'screens/auth_screen.dart';
-import 'screens/perfil_screen.dart';
+import 'screens/autenticacao.dart';
+import 'screens/perfil.dart';
 import 'screens/cadastro_cerveja.dart';
 import 'screens/minhas_cervejas.dart';
-import 'screens/explorar_cervejeiros_screen.dart';
-import 'screens/cervejas_amigos_screen.dart';
+import 'screens/cervejeiros_amigos.dart';
+import 'screens/cervejas_amigos.dart';
 import 'screens/menu_principal.dart';
-import 'screens/notificacoes_screen.dart';
+import 'screens/notificacoes.dart';
 
 // Providers
 import 'services/cerveja_provider.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart'; // para widgets e visuais
 import 'package:supabase_flutter/supabase_flutter.dart'; // para autenticação e consultas
-import 'perfil_screen.dart';
+import 'perfil.dart';
 import 'menu_principal.dart';
 
 class TelaInicial extends StatefulWidget {

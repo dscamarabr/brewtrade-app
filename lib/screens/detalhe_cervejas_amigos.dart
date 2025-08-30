@@ -75,7 +75,7 @@ class TelaDetalhesCerveja extends StatelessWidget {
                             final url = Uri.parse(
                               'https://wa.me/$numeroFormatado?text=${Uri.encodeComponent(msg)}',
                             );
-
+                            
                             launchUrl(url, mode: LaunchMode.externalApplication);
                           },
                         );
@@ -140,7 +140,7 @@ class TelaDetalhesCerveja extends StatelessWidget {
     VoidCallback? onTap,
   }) {
     const double tamanhoIcone = 24;
-    const corIcone = Colors.brown; // mesma cor dos outros
+    const corIcone = Colors.brown;
 
     final Widget widgetIcone = icone is IconData
         ? Icon(icone, size: tamanhoIcone, color: corIcone)
@@ -150,16 +150,20 @@ class TelaDetalhesCerveja extends StatelessWidget {
             height: tamanhoIcone,
             fit: BoxFit.scaleDown,
             alignment: Alignment.center,
-            colorFilter: const ColorFilter.mode(
-              corIcone, // mantém cor padrão
-              BlendMode.srcIn,
-            ),
+            colorFilter: const ColorFilter.mode(corIcone, BlendMode.srcIn),
           );
+
+    final textoEstilo = TextStyle(
+      color: onTap != null ? Colors.green.shade700 : Colors.black87,
+      fontWeight: onTap != null ? FontWeight.w600 : FontWeight.normal,
+      decoration: onTap != null ? TextDecoration.underline : null,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
-      child: GestureDetector(
+      child: InkWell(
         onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -171,13 +175,7 @@ class TelaDetalhesCerveja extends StatelessWidget {
                 children: [
                   Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2),
-                  Text(
-                    valor,
-                    style: TextStyle(
-                      color: Colors.black87, // cor padrão do texto
-                      decoration: onTap != null ? TextDecoration.underline : null, // apenas sublinhado no link
-                    ),
-                  ),
+                  Text(valor, style: textoEstilo),
                 ],
               ),
             ),

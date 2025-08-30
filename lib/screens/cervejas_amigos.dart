@@ -3,16 +3,19 @@ import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../services/cerveja_amigos_provider.dart';
-
 import 'detalhe_cervejas_amigos.dart';
-
 
 class TelaCervejasAmigos extends StatefulWidget {
   final String? idCervejeiro;
   final void Function()? onVoltar;
   final String origem;
 
-  const TelaCervejasAmigos({super.key, this.idCervejeiro, this.onVoltar, this.origem = "menu"});
+  const TelaCervejasAmigos({
+    super.key,
+    this.idCervejeiro,
+    this.onVoltar,
+    this.origem = "menu",
+  });
 
   @override
   State<TelaCervejasAmigos> createState() => _TelaCervejasAmigosState();
@@ -69,7 +72,7 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
       default:
         Navigator.of(context).pop();
     }
-  }  
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,16 +88,7 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
 
     return Scaffold(
       appBar: AppBar(
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: const Text(
-            'Cervejas dos Amigos',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-        ),
+        title: const Text('Cervejas dos Amigos'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: _voltar,
@@ -117,115 +111,123 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     child: Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 3,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            cerveja.imagens?.isNotEmpty == true
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      cerveja.imagens!.first,
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) { return const Icon(Icons.broken_image, size: 48); },),
-                                  )
+                      elevation: 4,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TelaDetalhesCerveja(cerveja: cerveja),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              cerveja.imagens?.isNotEmpty == true
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        cerveja.imagens!.first,
+                                        width: 70,
+                                        height: 70,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return const Icon(Icons.broken_image, size: 48);
+                                        },
+                                      ),
+                                    )
                                   : SvgPicture.asset(
                                       'assets/icons/garrafa_cerveja.svg',
-                                      width: 48,
-                                      height: 48,
+                                      width: 56,
+                                      height: 56,
                                       colorFilter: const ColorFilter.mode(
-                                        Colors.brown, // mesma cor que usaria no ícone Material
+                                        Colors.brown,
                                         BlendMode.srcIn,
                                       ),
                                     ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(cerveja.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                  const SizedBox(height: 4),
-                                  Text('${cerveja.estilo} • ${cerveja.abv.toStringAsFixed(1)}% ABV'),
-                                  Text('Cervejeiro: ${cerveja.descricao ?? 'Desconhecido'}'),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                                icon: SvgPicture.asset(
-                                  'assets/icons/detalhes_cerveja.svg',
-                                  width: 40,  // ajuste o tamanho conforme seu layout
-                                  height: 40,
-                                  colorFilter: ColorFilter.mode(
-                                    Theme.of(context).iconTheme.color!,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                              onPressed: () {
-                                try {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => TelaDetalhesCerveja(cerveja: cerveja),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      cerveja.nome,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
                                     ),
-                                  );
-                                } catch (e) {
-                                  print('Erro ao abrir detalhes: $e');
-                                }
-                              },
-                            ),
-                          ],
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Cervejeiro: ${cerveja.descricao ?? 'Desconhecido'}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Wrap(
+                                      spacing: 8,
+                                      children: [
+                                        Chip(
+                                          label: Text(cerveja.estilo),
+                                          backgroundColor: Colors.orange.withOpacity(0.1),
+                                        ),
+                                        Chip(
+                                          label: Text('${cerveja.abv.toStringAsFixed(1)}% ABV'),
+                                          backgroundColor: Colors.blue.withOpacity(0.1),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   );
                 },
               )
-              : _telaVazia()
+            : _telaVazia(),
       ),
     );
   }
 
   Widget _telaVazia() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Image.asset(
-              'assets/sem_cervejas.png',
-              width: MediaQuery.of(context).size.width * 0.6,
-              fit: BoxFit.cover,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(
+                'assets/sem_cervejas.png',
+                width: MediaQuery.of(context).size.width * 0.6,
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Procurando cervejas… ainda nada!',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Seus amigos tão te deixando na mão!',
-            style: TextStyle(fontSize: 16, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),          
-        ],
+          ],
+        ),
       ),
     );
-  }  
+  }
 
   Widget _menuOrdenacao(BuildContext context) {
     final provider = Provider.of<CervejaAmigosProvider>(context, listen: false);
     return PopupMenuButton<String>(
       icon: const Icon(Icons.sort),
       onSelected: provider.atualizarOrdenacao,
-      itemBuilder: (_) => ['Nome', 'Estilo', 'ABV', 'Cervejeiro']
-          .map((ord) => PopupMenuItem(value: ord, child: Text(ord)))
-          .toList(),
+      itemBuilder: (_) =>
+          ['Nome', 'Estilo', 'ABV', 'Cervejeiro'].map((ord) => PopupMenuItem(value: ord, child: Text(ord))).toList(),
     );
   }
 
@@ -257,5 +259,3 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
     );
   }
 }
-
-

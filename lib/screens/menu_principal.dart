@@ -9,13 +9,13 @@ import '../services/cerveja_provider.dart';
 import '../services/notificacao_provider.dart';
 import '../services/cerveja_amigos_provider.dart';
 
-import '../screens/auth_screen.dart';
+import '../screens/autenticacao.dart';
 import '../screens/minhas_cervejas.dart';
-import '../screens/perfil_screen.dart';
+import '../screens/perfil.dart';
 import '../screens/cadastro_cerveja.dart';
-import '../screens/explorar_cervejeiros_screen.dart';
-import '../screens/cervejas_amigos_screen.dart';
-import '../screens/notificacoes_screen.dart';
+import '../screens/cervejeiros_amigos.dart';
+import '../screens/cervejas_amigos.dart';
+import '../screens/notificacoes.dart';
 import '../screens/doacao.dart';
 import '../screens/contato.dart';
 

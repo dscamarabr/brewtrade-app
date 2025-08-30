@@ -4,13 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '/models/cerveja.dart';
-
 import '../services/cerveja_provider.dart';
-
 import 'cadastro_cerveja.dart';
 import 'menu_principal.dart';
-
-
 
 class TelaListaCervejas extends StatelessWidget {
   const TelaListaCervejas({super.key});
@@ -26,8 +22,9 @@ class TelaListaCervejas extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-              final parentState = context.findAncestorStateOfType<MenuPrincipalState>();
-              parentState?.voltarParaMenu();
+            final parentState =
+                context.findAncestorStateOfType<MenuPrincipalState>();
+            parentState?.voltarParaMenu();
           },
         ),
         actions: temCervejas
@@ -45,7 +42,8 @@ class TelaListaCervejas extends StatelessWidget {
     );
   }
 
-  Map<String, List<Cerveja>> agruparPorSituacaoOrdenada(CervejaProvider provider) {
+  Map<String, List<Cerveja>> agruparPorSituacaoOrdenada(
+      CervejaProvider provider) {
     final lista = provider.cervejasFiltradas;
 
     int comparator(Cerveja a, Cerveja b) {
@@ -78,9 +76,9 @@ class TelaListaCervejas extends StatelessWidget {
         final uri = Uri.parse(url);
         final index = uri.path.indexOf('/object/public/');
         if (index != -1) {
-          var filePath = uri.path.substring(index + '/object/public/'.length);
+          var filePath =
+              uri.path.substring(index + '/object/public/'.length);
 
-          // Remover prefixo do bucket, se existir
           if (filePath.startsWith('cervejas/')) {
             filePath = filePath.replaceFirst('cervejas/', '');
           }
@@ -99,104 +97,176 @@ class TelaListaCervejas extends StatelessWidget {
     return ListView(
       children: grupos.entries
           .where((entry) => entry.value.isNotEmpty)
-          .map((entry) => Column(
+          .map(
+            (entry)  {
+            
+              final titulo = entry.key == 'Disponível para troca'
+                  ? 'Disponíveis para Troca'
+                  : 'Inativas';            
+            
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
+                  Container(
+                    width: double.infinity,
+                    color: titulo == 'Disponíveis para Troca'
+                        ? Colors.green.shade600.withOpacity(0.2)
+                        : Colors.grey.shade700.withOpacity(0.2),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: Text(
-                      entry.key,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                    child: Row(
+                      children: [
+                        Icon(
+                          titulo == 'Disponíveis para Troca'
+                              ? Icons.swap_horiz
+                              : Icons.pause_circle,
+                          color: titulo == 'Disponíveis para Troca'
+                              ? Colors.green.shade700
+                              : Colors.grey.shade800,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          titulo,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ),
-                  ...entry.value.map((cerveja) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        child: Card(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              children: [
-                                cerveja.imagens?.isNotEmpty == true
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          cerveja.imagens!.first,
-                                          width: 60,
-                                          height: 60,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
-                                      : SvgPicture.asset(
-                                          'assets/icons/garrafa_cerveja.svg',
-                                          width: 48,
-                                          height: 48,
-                                          colorFilter: const ColorFilter.mode(
-                                            Colors.brown, // mesma cor que os outros ícones
-                                            BlendMode.srcIn,
+                  ...entry.value.map(
+                    (cerveja) => Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 6),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 4,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              cerveja.imagens?.isNotEmpty == true
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        cerveja.imagens!.first,
+                                        width: 70,
+                                        height: 70,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : SvgPicture.asset(
+                                      'assets/icons/garrafa_cerveja.svg',
+                                      width: 56,
+                                      height: 56,
+                                      colorFilter: const ColorFilter.mode(
+                                        Colors.brown,
+                                        BlendMode.srcIn,
+                                      ),
+                                    ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            cerveja.nome,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
                                           ),
                                         ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        cerveja.nome,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text('${cerveja.estilo} • ${cerveja.abv.toStringAsFixed(1)}% ABV'),
-                                    ],
-                                  ),
-                                ),
-                                Wrap(
-                                  spacing: 8,
-                                  children: [
-                                    IconButton(
-                                      icon: SvgPicture.asset(
-                                        'assets/icons/editar_cerveja.svg',
-                                        width: 36,
-                                        height: 36,
-                                        colorFilter: const ColorFilter.mode(Colors.brown, BlendMode.srcIn),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => TelaCadastroCerveja(
-                                              cerveja: cerveja,
-                                              popAoSalvar: true,
-                                              onVoltar: () {
-                                                final parentState = context.findAncestorStateOfType<MenuPrincipalState>();
-                                                parentState?.voltarParaMenu();
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              tooltip: "Editar cerveja",
+                                              icon: SvgPicture.asset(
+                                                'assets/icons/editar_cerveja.svg',
+                                                width: 24,
+                                                height: 24,
+                                                colorFilter:
+                                                    const ColorFilter.mode(
+                                                        Colors.blue,
+                                                        BlendMode.srcIn),
+                                              ),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        TelaCadastroCerveja(
+                                                      cerveja: cerveja,
+                                                      popAoSalvar: true,
+                                                      onVoltar: () {
+                                                        final parentState = context
+                                                            .findAncestorStateOfType<
+                                                                MenuPrincipalState>();
+                                                        parentState
+                                                            ?.voltarParaMenu();
+                                                      },
+                                                    ),
+                                                    fullscreenDialog: true,
+                                                  ),
+                                                );
                                               },
                                             ),
-                                            fullscreenDialog: true,
-                                          ),
-                                        );
-                                      },
+                                            IconButton(
+                                              tooltip: "Remover cerveja",
+                                              icon: SvgPicture.asset(
+                                                'assets/icons/apagar_cerveja.svg',
+                                                width: 24,
+                                                height: 24,
+                                                colorFilter:
+                                                    const ColorFilter.mode(
+                                                        Colors.red,
+                                                        BlendMode.srcIn),
+                                              ),
+                                              onPressed: () => confirmarRemocao(
+                                                  context, cerveja),
+                                            ),
+                                          ],
+                                        )
+                                      ],
                                     ),
-                                    IconButton(
-                                      icon: SvgPicture.asset(
-                                        'assets/icons/apagar_cerveja.svg',
-                                        width: 36,
-                                        height: 36,
-                                        fit: BoxFit.contain,
-                                        colorFilter: const ColorFilter.mode(Colors.brown, BlendMode.srcIn),
-                                      ),
-                                      onPressed: () => confirmarRemocao(context, cerveja),
+                                    const SizedBox(height: 6),
+                                    Wrap(
+                                      spacing: 8,
+                                      children: [
+                                        Chip(
+                                          label: Text(cerveja.estilo),
+                                          backgroundColor:
+                                              Colors.orange.withOpacity(0.1),
+                                        ),
+                                        Chip(
+                                          label: Text(
+                                              '${cerveja.abv.toStringAsFixed(1)}% ABV'),
+                                          backgroundColor:
+                                              Colors.blue.withOpacity(0.1),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                 ],
-              ))
+              );
+            }
+          )
           .toList(),
     );
   }
@@ -206,7 +276,8 @@ class TelaListaCervejas extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remover cerveja'),
-        content: Text('Deseja realmente remover a cerveja "${cerveja.nome}"?'),
+        content:
+            Text('Deseja realmente remover a cerveja "${cerveja.nome}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -217,12 +288,13 @@ class TelaListaCervejas extends StatelessWidget {
               if (cerveja.imagens?.isNotEmpty == true) {
                 await excluirImagensSupabase(cerveja.imagens!);
               }
-
-              Provider.of<CervejaProvider>(context, listen: false).removerCerveja(cerveja);
+              Provider.of<CervejaProvider>(context, listen: false)
+                  .removerCerveja(cerveja);
               Navigator.pop(ctx);
-
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Cerveja removida com sucesso')),
+                const SnackBar(
+                  content: Text('Cerveja removida com sucesso'),
+                ),
               );
             },
             child: const Text('Remover'),

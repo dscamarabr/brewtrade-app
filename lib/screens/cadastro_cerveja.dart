@@ -6,6 +6,7 @@ import '/models/cerveja.dart';
 import 'package:provider/provider.dart';
 import '../services/cerveja_provider.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 
 class TelaCadastroCerveja extends StatefulWidget {
@@ -14,12 +15,13 @@ class TelaCadastroCerveja extends StatefulWidget {
   final void Function()? onVoltar;
   final bool popAoSalvar;
 
-  const TelaCadastroCerveja({this.cerveja,
-                             this.onSalvar,
-                             this.onVoltar,
-                             this.popAoSalvar = false,
-                             Key? key})
-      : super(key: key);
+  const TelaCadastroCerveja({
+    this.cerveja,
+    this.onSalvar,
+    this.onVoltar,
+    this.popAoSalvar = false,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<TelaCadastroCerveja> createState() => _TelaCadastroCervejaState();
@@ -106,7 +108,7 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
           .single();
 
       if (!mounted) return;
-      
+
       setState(() {
         cervejariaCtrl.text = res['cervejaria'] ?? '';
       });
@@ -170,21 +172,6 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
     );
   }
 
-  Future<bool> _confirmarSaida() async {
-    final sair = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Tem certeza?'),
-        content: const Text('As alterações não foram salvas. Deseja sair assim mesmo?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Sair')),
-        ],
-      ),
-    );
-    return sair ?? false;
-  }  
-
   Future<void> salvarCerveja() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -209,22 +196,20 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
       'data_cadastro': DateTime.now().toIso8601String(),
     };
 
-    if (widget.cerveja != null) {
+    if (isEditando) {
       await Supabase.instance.client
           .from('tb_cervejas')
           .update(dados)
           .eq('id_cerveja', widget.cerveja!.id_cerveja);
-
-      Provider.of<CervejaProvider>(context, listen: false).carregarCervejasDoBanco();
     } else {
       await Supabase.instance.client
           .from('tb_cervejas')
           .insert(dados)
           .select()
           .single();
-
-      Provider.of<CervejaProvider>(context, listen: false).carregarCervejasDoBanco();
     }
+
+    Provider.of<CervejaProvider>(context, listen: false).carregarCervejasDoBanco();
 
     showDialog(
       context: context,
@@ -234,11 +219,10 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(ctx).pop();       // fecha o diálogo
-              widget.onVoltar?.call();       // executa lógica de retorno ao menu
-
+              Navigator.of(ctx).pop();
+              widget.onVoltar?.call();
               if (widget.popAoSalvar) {
-                Navigator.of(context).pop(); // fecha a tela só se ela veio via push
+                Navigator.of(context).pop();
               }
             },
             child: const Text('OK'),
@@ -250,27 +234,19 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        final sair = await _confirmarSaida();
-        if (sair) {
-          widget.onVoltar?.call(); // se precisar atualizar lista, etc.
-        }
-        return sair; // permite o pop quando confirmado
-      },
-      child: Scaffold(
+    final inputBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: Colors.grey.shade400),
+    );
+
+    return Scaffold(
         appBar: AppBar(
           title: Text(isEditando ? 'Editar Cerveja' : 'Cadastrar Cerveja'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              final sair = await _confirmarSaida();
-              if (sair) {
-                widget.onVoltar?.call();
-                if (Navigator.canPop(context)) {
-                  Navigator.pop(context);
-                }
-              }
+            onPressed: () {
+              widget.onVoltar?.call();
+              if (Navigator.canPop(context)) Navigator.pop(context);
             },
           ),
         ),
@@ -280,25 +256,242 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
             key: _formKey,
             child: ListView(
               children: [
-                TextFormField(controller: nomeCtrl, decoration: InputDecoration(labelText: 'Nome'), validator: (v) => v!.isEmpty ? 'Informe o nome' : null),
-                TextFormField(controller: cervejariaCtrl, decoration: InputDecoration(labelText: 'Cervejaria'), validator: (v) => v!.isEmpty ? 'Informe a cervejaria' : null),
-                TextFormField(controller: estiloCtrl, decoration: InputDecoration(labelText: 'Estilo'), validator: (v) => v!.isEmpty ? 'Informe o estilo' : null),
-                TextFormField(controller: abvCtrl, decoration: InputDecoration(labelText: 'ABV (%)'), keyboardType: TextInputType.number, inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),], validator: (v) { if (v == null || v.isEmpty) return 'Informe o ABV'; final abv = double.tryParse(v); return abv == null || abv < 0 ? 'ABV inválido' : null;  },),
-                TextFormField(controller: ibuCtrl, decoration: InputDecoration(labelText: 'IBU'), keyboardType: TextInputType.number, inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),], validator: (v) { if (v != null && v.isNotEmpty) { final ibu = int.tryParse(v); if (ibu == null || ibu < 0) return 'IBU inválido'; } return null; },),
-                TextFormField(controller: volumeCtrl, decoration: InputDecoration(labelText: 'Volume (ml)'), keyboardType: TextInputType.number, inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),], validator: (v) { if (v == null || v.isEmpty) return 'Informe o volume'; final vol = int.tryParse(v); return vol == null || vol <= 0 ? 'Volume inválido' : null; },),
-                TextFormField(controller: quantidadeCtrl, decoration: InputDecoration(labelText: 'Quantidade'), keyboardType: TextInputType.number, inputFormatters: [ FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),], validator: (v) { if (v != null && v.isNotEmpty) { final qtd = int.tryParse(v); if (qtd == null || qtd < 0) return 'Quantidade inválida'; } return null; },),
-                TextFormField(controller: descricaoCtrl, decoration: InputDecoration(labelText: 'Descrição'), maxLines: 3),
-                DropdownButtonFormField<String>(
-                  value: situacao,
-                  decoration: InputDecoration(labelText: 'Situação'),
-                  items: ['Disponível para troca','Inativa']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (value) => setState(() => situacao = value!),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: nomeCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Nome',
+                    prefixIcon: const Icon(Icons.local_drink),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: inputBorder.copyWith(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                    ),
+                  ),
+                  validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
                 ),
-                SizedBox(height: 20),
-                Text('Selecionar imagens (máx 3):'),
-                ElevatedButton(
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: cervejariaCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Cervejaria',
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/cervejaria.svg',
+                        width: 24,
+                        height: 24,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: inputBorder.copyWith(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                    ),
+                  ),
+                  validator: (v) => v!.isEmpty ? 'Informe a cervejaria' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: estiloCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Estilo',
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/estilo_cerveja.svg',
+                        width: 24,
+                        height: 24,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: inputBorder.copyWith(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                    ),
+                  ),
+                  validator: (v) => v!.isEmpty ? 'Informe o estilo' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: abvCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'ABV (%)',
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/abv.svg',
+                        width: 24,
+                        height: 24,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: inputBorder.copyWith(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Informe o ABV';
+                    final abv = double.tryParse(v);
+                    return abv == null || abv < 0 ? 'ABV inválido' : null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: ibuCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'IBU',
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/lupulo.svg',
+                        width: 24,
+                        height: 24,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: inputBorder.copyWith(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                  ],
+                  validator: (v) {
+                    if (v != null && v.isNotEmpty) {
+                      final ibu = int.tryParse(v);
+                      if (ibu == null || ibu < 0) return 'IBU inválido';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: volumeCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Volume (ml)',
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/garrafa_cerveja.svg',
+                        width: 24,
+                        height: 24,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: inputBorder.copyWith(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                  ],
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Informe o volume';
+                    final vol = int.tryParse(v);
+                    return vol == null || vol <= 0 ? 'Volume inválido' : null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: quantidadeCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Quantidade',
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: SvgPicture.asset(
+                        'assets/icons/quantidade_cervejas.svg',
+                        width: 24,
+                        height: 24,
+                      ),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: inputBorder.copyWith(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                  ],
+                  validator: (v) {
+                    if (v != null && v.isNotEmpty) {
+                      final qtd = int.tryParse(v);
+                      if (qtd == null || qtd < 0) return 'Quantidade inválida';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: descricaoCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'Descrição',
+                    prefixIcon: const Icon(Icons.notes),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: inputBorder.copyWith(
+                      borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor, width: 2),
+                    ),
+                  ),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Selecionar imagens (máx 3):',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 6),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Escolher imagens'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 1.5,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
+                  ),
                   onPressed: () async {
                     final picker = ImagePicker();
                     final imgs = await picker.pickMultiImage();
@@ -306,32 +499,41 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
                       setState(() => imagensSelecionadas = imgs);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Cada cerveja pode ter no máximo 3 imagens')),
+                        const SnackBar(content: Text('Máximo de 3 imagens por cerveja')),
                       );
                     }
                   },
-                  child: Text('Escolher imagens'),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  runAlignment: WrapAlignment.center,
                   children: [
                     ...imagensExistentes.map((url) => Stack(
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.network(url, width: 100, height: 100, fit: BoxFit.cover),
+                              child: Image.network(
+                                url,
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                             Positioned(
                               top: 4,
                               right: 4,
                               child: GestureDetector(
-                                onTap: () => confirmarExclusaoImagemExistente(url),
+                                onTap: () =>
+                                    confirmarExclusaoImagemExistente(url),
                                 child: CircleAvatar(
                                   radius: 12,
-                                  backgroundColor: Colors.black.withOpacity(0.7),
-                                  child: Icon(Icons.close, size: 16, color: Colors.white),
+                                  backgroundColor:
+                                      Colors.black.withOpacity(0.7),
+                                  child: const Icon(Icons.close,
+                                      size: 16, color: Colors.white),
                                 ),
                               ),
                             ),
@@ -341,17 +543,25 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
-                              child: Image.file(File(imagem.path), width: 100, height: 100, fit: BoxFit.cover),
+                              child: Image.file(
+                                File(imagem.path),
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                             Positioned(
                               top: 4,
                               right: 4,
                               child: GestureDetector(
-                                onTap: () => confirmarExclusaoImagemSelecionada(imagem),
+                                onTap: () =>
+                                    confirmarExclusaoImagemSelecionada(imagem),
                                 child: CircleAvatar(
                                   radius: 12,
-                                  backgroundColor: Colors.black.withOpacity(0.7),
-                                  child: Icon(Icons.close, size: 16, color: Colors.white),
+                                  backgroundColor:
+                                      Colors.black.withOpacity(0.7),
+                                  child: const Icon(Icons.close,
+                                      size: 16, color: Colors.white),
                                 ),
                               ),
                             ),
@@ -359,17 +569,60 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
                         )),
                   ],
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: salvarCerveja,
-                  child: Text(isEditando ? 'Atualizar' : 'Salvar'),
+                const SizedBox(height: 20),
+                DropdownButtonFormField<String>(
+                  value: situacao,
+                  decoration: InputDecoration(
+                    labelText: 'Situação',
+                    prefixIcon: Icon(
+                      situacao == 'Disponível para troca'
+                          ? Icons.swap_horiz
+                          : Icons.pause_circle,
+                      color: situacao == 'Disponível para troca'
+                          ? Colors.green.shade700
+                          : Colors.grey.shade700,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: inputBorder,
+                    enabledBorder: inputBorder,
+                    focusedBorder: inputBorder.copyWith(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor,
+                        width: 2,
+                      ),
+                    ),                    
+                  ),
+                  items: ['Disponível para troca', 'Inativa']
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) => setState(() => situacao = value!),
                 ),
+                const SizedBox(height: 24),
+SizedBox(
+  width: double.infinity,
+  child: ElevatedButton.icon(
+    icon: const Icon(Icons.save),
+    label: const Text('Salvar Cerveja'),
+    style: ElevatedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    ),
+    onPressed: salvarCerveja,
+  ),
+),
               ],
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
-
