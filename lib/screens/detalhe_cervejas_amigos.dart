@@ -202,13 +202,29 @@ class _CarrosselImagens extends StatelessWidget {
             controller: PageController(viewportFraction: 0.8),
             itemCount: imagensLimitadas.length,
             itemBuilder: (context, index) {
+              final url = imagensLimitadas[index];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    imagensLimitadas[index],
-                    fit: BoxFit.cover,
+                child: GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.black,
+                      builder: (_) {
+                        return _GaleriaFullscreen(
+                          imagens: imagensLimitadas,
+                          initialIndex: index,
+                        );
+                      },
+                    );
+                  },
+                  child: Hero(
+                    tag: url,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(url, fit: BoxFit.cover),
+                    ),
                   ),
                 ),
               );
@@ -232,6 +248,78 @@ class _CarrosselImagens extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _GaleriaFullscreen extends StatefulWidget {
+  final List<String> imagens;
+  final int initialIndex;
+  const _GaleriaFullscreen({
+    required this.imagens,
+    required this.initialIndex,
+  });
+
+  @override
+  State<_GaleriaFullscreen> createState() => _GaleriaFullscreenState();
+}
+
+class _GaleriaFullscreenState extends State<_GaleriaFullscreen> {
+  late PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Stack(
+        children: [
+          PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) => setState(() => _currentIndex = index),
+            itemCount: widget.imagens.length,
+            itemBuilder: (context, index) {
+              final url = widget.imagens[index];
+              return GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: InteractiveViewer(
+                  child: Center(
+                    child: Hero(
+                      tag: url,
+                      child: Image.network(url, fit: BoxFit.contain),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          Positioned(
+            top: 16,
+            right: 16,
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white, size: 28),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(
+                '${_currentIndex + 1} / ${widget.imagens.length}',
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

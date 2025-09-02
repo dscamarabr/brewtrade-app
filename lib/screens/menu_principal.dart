@@ -18,6 +18,7 @@ import '../screens/cervejas_amigos.dart';
 import '../screens/notificacoes.dart';
 import '../screens/doacao.dart';
 import '../screens/contato.dart';
+import '../screens/quem_somos.dart';
 
 class MenuPrincipal extends StatefulWidget {
   @override
@@ -252,21 +253,55 @@ class MenuPrincipalState extends State<MenuPrincipal> {
       },
     ];
 
+    final fotoUrl = context.watch<PerfilProvider>().fotoUrl;
+    Widget avatar;
+    if (fotoUrl != null && fotoUrl.isNotEmpty) {
+      avatar = CircleAvatar(
+        radius: 48,
+        backgroundImage: NetworkImage(fotoUrl),
+        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+      );
+    } else {
+      avatar = CircleAvatar(
+        radius: 48,
+        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+        child: Icon(Icons.person, color: Theme.of(context).colorScheme.onSecondaryContainer),
+      );
+    }
+
     Widget _buildBody() {
       switch (_indiceAtual) {
         case 0:
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Olá, ${context.watch<PerfilProvider>().nome ?? 'Cervejeiro'} 🍻',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
+          return Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      avatar,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Olá, ${context.watch<PerfilProvider>().nome ?? 'Cervejeiro'}',
+                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            Text(
+                              'Hora de abrir uma Stout!',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     IconButton(
                       icon: const Icon(Icons.logout, color: Colors.redAccent),
                       tooltip: 'Sair da conta',
@@ -303,56 +338,58 @@ class MenuPrincipalState extends State<MenuPrincipal> {
                         );
                       },
                     ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(0),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    itemCount: opcoes.length,
-                    itemBuilder: (context, index) {
-                      final opcao = opcoes[index];
-                      return GestureDetector(
-                        onTap: () => navegarPara(opcao['indice'] as int),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 4,
-                                offset: Offset(2, 2),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Aqui pode ser um Icon ou um SvgPicture.asset
-                              opcao['icone'] as Widget,
-                              const SizedBox(height: 12),
-                              Text(
-                                opcao['titulo'] as String,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 24),
+                  Expanded(
+                    child: GridView.builder(
+                      padding: EdgeInsets.zero,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: opcoes.length,
+                      itemBuilder: (context, index) {
+                        final opcao = opcoes[index];
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 2,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () => navegarPara(opcao['indice'] as int),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Expanded(child: Center(child: opcao['icone'] as Widget)),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    opcao['titulo'] as String,
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
+
         case 1:
           return TelaListaCervejas();
+
         case 2:
           return TelaCadastroCerveja(
             key: _cadastroKey,
@@ -360,23 +397,27 @@ class MenuPrincipalState extends State<MenuPrincipal> {
             onSalvar: () => setState(() => _indiceAtual = 1),
             onVoltar: voltarParaMenu,
           );
+
         case 3:
           return ExplorarCervejeirosScreen(
             onVoltar: () => setState(() => _indiceAtual = 0),
             onVerCervejasDoAmigo: (id) => verCervejasDoAmigo(id),
           );
+
         case 4:
-          return TelaCervejasAmigos(
-            origem: "menu",
-          );
+          return TelaCervejasAmigos(origem: "menu");
+
         case 5:
           final idUsuario = context.watch<PerfilProvider>().id!;
           return TelaNotificacoes(
             idUsuarioLogado: idUsuario,
             onVoltar: () => setState(() => _indiceAtual = 0),
-            onAbrirCervejasDoAmigo: (idCervejeiro) => verCervejasDoAmigo(idCervejeiro),);
+            onAbrirCervejasDoAmigo: (idCervejeiro) => verCervejasDoAmigo(idCervejeiro),
+          );
+
         case 6:
           return PerfilScreen(onVoltar: () => setState(() => _indiceAtual = 0));
+
         default:
           return const Center(child: Text('Erro: Tela não encontrada'));
       }
@@ -387,37 +428,28 @@ class MenuPrincipalState extends State<MenuPrincipal> {
       body: SafeArea(child: _buildBody()),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
+        selectedItemColor: Colors.grey,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
         onTap: (index) {
           switch (index) {
             case 0:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => TelaDoacao()),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (_) => TelaDoacao()));
               break;
             case 1:
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => TelaContato()),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (_) => TelaContato()));
+              break;
+            case 2:
+              Navigator.push(context, MaterialPageRoute(builder: (_) => TelaQuemSomos()));
               break;
           }
         },
-        selectedItemColor: Colors.grey,
-        unselectedItemColor: Colors.grey,
-        selectedLabelStyle: const TextStyle(color: Colors.grey),
-        unselectedLabelStyle: const TextStyle(color: Colors.grey),
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.volunteer_activism),
-            label: 'Doação',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.contact_mail),
-            label: 'Contato',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.volunteer_activism), label: 'Doação'),
+          BottomNavigationBarItem(icon: Icon(Icons.contact_mail), label: 'Contato'),
+          BottomNavigationBarItem(icon: Icon(Icons.info_outline), label: 'Quem Somos'),
         ],
       ),
     );

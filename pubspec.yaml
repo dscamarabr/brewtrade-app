@@ -24,6 +24,9 @@ dependencies:
   http: ^1.2.1
   flutter_local_notifications: ^17.2.2
   intl: ^0.19.0
+  flutter_native_splash: ^2.4.6
+  package_info_plus: ^8.0.0
+  app_links: ^3.4.0
 
 dev_dependencies:
   flutter_test:
@@ -35,6 +38,16 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon.png" 
+  adaptive_icon_foreground: "assets/icon.png"  
+  adaptive_icon_background: "#00000000"
+
+flutter_native_splash:
+  color: "#E7E0EC" # fundo amarelo do splash
+  image: assets/splash.png
+  android: true
+  ios: true
+  android_gravity: center
+  ios_content_mode: center
 
 flutter:
   uses-material-design: true
@@ -49,6 +62,8 @@ flutter:
     - assets/doacao.png
     - assets/contato.png
     - assets/login.png
+    - assets/splash.png
+    - assets/quem_somos.png
     - assets/recuperar_senha.png
     - assets/confirmacao_email.png
     - assets/icons/cervejeiros.svg

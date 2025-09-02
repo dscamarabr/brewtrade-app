@@ -43,7 +43,10 @@ class _TelaNotificacoesState extends State<TelaNotificacoes> {
     if (widget.onVoltar != null) {
       widget.onVoltar!();
     } else {
-      Navigator.of(context).pushReplacementNamed('/menuPrincipal');
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/menuPrincipal',
+        (Route<dynamic> route) => false,
+      );
     }
   }
 

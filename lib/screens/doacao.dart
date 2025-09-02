@@ -27,8 +27,6 @@ class _TelaDoacaoState extends State<TelaDoacao> {
       appBar: AppBar(
         title: const Text('Apoie o Projeto'),
         centerTitle: true,
-        backgroundColor: colorScheme.primaryContainer,
-        foregroundColor: colorScheme.onPrimaryContainer,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -37,7 +35,7 @@ class _TelaDoacaoState extends State<TelaDoacao> {
           children: [
             // 🦥 Imagem menor e centralizada
             SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
+              width: MediaQuery.of(context).size.width * 0.4,
               child: Image.asset(
                 'assets/doacao.png',
                 fit: BoxFit.contain,

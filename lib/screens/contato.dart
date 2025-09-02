@@ -97,7 +97,7 @@ class _TelaContatoState extends State<TelaContato> {
               children: [
                 // 🖼 Imagem no topo
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.5,
+                  width: MediaQuery.of(context).size.width * 0.4,
                   child: Image.asset(
                     'assets/contato.png',
                     fit: BoxFit.contain,

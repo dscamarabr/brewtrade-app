@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart'; // para kIsWeb
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:app_links/app_links.dart';
 
+
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -23,8 +26,15 @@ class _AuthScreenState extends State<AuthScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  bool _obscurePassword = true;
+
+  late final AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSub;
+
   bool isLogin = true;
   bool loading = false;
+
+  String _appVersion = '';
 
   // Controle de token para evitar envios duplicados + listener
   String? _ultimoTokenEnviado;
@@ -97,6 +107,12 @@ class _AuthScreenState extends State<AuthScreen> {
   void initState() {
     super.initState();
 
+    PackageInfo.fromPlatform().then((info) {
+      setState(() {
+        _appVersion = 'v${info.version}+${info.buildNumber}';
+      });
+    });    
+
     // Listener para mudanças de token (reinstalação, refresh, etc.)
     if (!kIsWeb) {
       _tokenSub = FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
@@ -107,6 +123,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   void dispose() {
+    _linkSub?.cancel();
     _tokenSub?.cancel();
     emailController.dispose();
     passwordController.dispose();
@@ -146,7 +163,11 @@ class _AuthScreenState extends State<AuthScreen> {
       if (isLogin) {
         await auth.signInWithPassword(email: email, password: password);
       } else {
-        final response = await auth.signUp(email: email, password: password);
+        final response = await auth.signUp(
+          email: email,
+          password: password,
+          emailRedirectTo: 'meuapp://login-callback',
+        );
         final user = response.user;
 
         if (user == null) {
@@ -268,7 +289,7 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+ 
     return Scaffold(
       backgroundColor: theme.colorScheme.surfaceVariant,
       body: Center(
@@ -325,11 +346,23 @@ class _AuthScreenState extends State<AuthScreen> {
                       const SizedBox(height: 16),
                       TextField(
                         controller: passwordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.lock_outline),
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.lock_outline),
                           labelText: 'Senha',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
                         ),
                       ),
                       if (isLogin)
@@ -381,6 +414,14 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ],
                   ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Opacity(
+                opacity: 0.5,
+                child: Text(
+                  _appVersion,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
             ],
