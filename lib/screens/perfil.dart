@@ -178,8 +178,23 @@ class _PerfilScreenState extends State<PerfilScreen> {
               TextFormField(
                 controller: nomeController,
                 decoration: const InputDecoration(labelText: 'Nome'),
+                textCapitalization: TextCapitalization.words,
                 validator: (value) =>
                     value == null || value.isEmpty ? 'Informe seu nome' : null,
+                onChanged: (value) {
+                  final capitalizado = value
+                      .split(' ')
+                      .map((word) => word.isNotEmpty
+                          ? '${word[0].toUpperCase()}${word.substring(1)}'
+                          : '')
+                      .join(' ');
+                  if (value != capitalizado) {
+                    nomeController.value = nomeController.value.copyWith(
+                      text: capitalizado,
+                      selection: TextSelection.collapsed(offset: capitalizado.length),
+                    );
+                  }
+                },
               ),
               TextFormField(
                 controller: telefoneController,
@@ -203,10 +218,40 @@ class _PerfilScreenState extends State<PerfilScreen> {
               TextFormField(
                 controller: cidadeController,
                 decoration: const InputDecoration(labelText: 'Cidade'),
+                textCapitalization: TextCapitalization.words,
+                onChanged: (value) {
+                  final capitalizado = value
+                      .split(' ')
+                      .map((word) => word.isNotEmpty
+                          ? '${word[0].toUpperCase()}${word.substring(1)}'
+                          : '')
+                      .join(' ');
+                  if (value != capitalizado) {
+                    cidadeController.value = cidadeController.value.copyWith(
+                      text: capitalizado,
+                      selection: TextSelection.collapsed(offset: capitalizado.length),
+                    );
+                  }
+                },
               ),
               TextFormField(
                 controller: cervejariaController,
                 decoration: const InputDecoration(labelText: 'Cervejaria'),
+                textCapitalization: TextCapitalization.words,
+                onChanged: (value) {
+                  final capitalizado = value
+                      .split(' ')
+                      .map((word) => word.isNotEmpty
+                          ? '${word[0].toUpperCase()}${word.substring(1)}'
+                          : '')
+                      .join(' ');
+                  if (value != capitalizado) {
+                    cervejariaController.value = cervejariaController.value.copyWith(
+                      text: capitalizado,
+                      selection: TextSelection.collapsed(offset: capitalizado.length),
+                    );
+                  }
+                },
               ),
               TextFormField(
                 controller: redeSocialController,
@@ -216,6 +261,18 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 controller: bioController,
                 decoration: InputDecoration(labelText: 'Bio'),
                 maxLines: 2,
+                textCapitalization: TextCapitalization.sentences,
+                onChanged: (value) {
+                  if (value.isNotEmpty) {
+                  final capitalizado = value[0].toUpperCase() + value.substring(1);
+                  if (value != capitalizado) {
+                    bioController.value = bioController.value.copyWith(
+                    text: capitalizado,
+                    selection: TextSelection.collapsed(offset: capitalizado.length),
+                    );
+                  }
+                  }
+                },
               ),
               const SizedBox(height: 20),
               Card(
@@ -374,7 +431,7 @@ class _PerfilScreenState extends State<PerfilScreen> {
                 value: perfilProvider.permiteNotificacoes,
                 onChanged: (value) {
                   perfilProvider.atualizarPerfil({
-                    'permite_notificacoes': value ?? false,
+                    'permite_notificacoes': value ?? true,
                   });
                 },
               ),

@@ -75,6 +75,8 @@ class CervejaAmigosProvider extends ChangeNotifier {
           return a.abv.compareTo(b.abv);
         case 'Cervejeiro':
           return (a.descricao ?? '').toLowerCase().compareTo((b.descricao ?? '').toLowerCase());
+        case 'Data':
+          return b.data_cadastro.compareTo(a.data_cadastro);          
         case 'Nome':
         default:
           return a.nome.toLowerCase().compareTo(b.nome.toLowerCase());

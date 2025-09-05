@@ -1,84 +1,38 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:app_links/app_links.dart';
 
 class EmailConfirmationScreen extends StatefulWidget {
   final String email;
-  const EmailConfirmationScreen({required this.email, super.key});
+
+  const EmailConfirmationScreen({super.key, required this.email});
 
   @override
   State<EmailConfirmationScreen> createState() => _EmailConfirmationScreenState();
 }
 
 class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
-  late final AppLinks _appLinks;
-  StreamSubscription<Uri>? _linkSub;
-
-  @override
-  void initState() {
-    super.initState();
-    final supabase = Supabase.instance.client;
-    _appLinks = AppLinks();
-
-    // Captura link inicial (app fechado e aberto pelo link)
-    _appLinks.getInitialAppLink().then((uri) {
-      _handleIncomingLink(uri, supabase);
-    });
-
-    // Captura links recebidos com app aberto
-    _linkSub = _appLinks.uriLinkStream.listen((uri) {
-      _handleIncomingLink(uri, supabase);
-    });
-  }
-
-  Future<void> _handleIncomingLink(Uri? uri, SupabaseClient supabase) async {
-    if (uri != null && uri.queryParameters['code'] != null) {
-      final code = uri.queryParameters['code']!;
-      final res = await supabase.auth.exchangeCodeForSession(code);
-
-      if (res.session != null && mounted) {
-        // Força logout para obrigar login
-        await supabase.auth.signOut();
-
-        // Mostra mensagem de sucesso
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ E-mail confirmado com sucesso!'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-
-        // Aguarda a mensagem aparecer antes de redirecionar
-        await Future.delayed(const Duration(seconds: 3));
-
-        // Volta para tela de autenticação limpando histórico
-        Navigator.pushNamedAndRemoveUntil(context, '/auth', (route) => false);
-      }
-    }
-  }
+  bool reenviando = false;
 
   Future<void> _reenviarEmail() async {
+    setState(() => reenviando = true);
     try {
       await Supabase.instance.client.auth.resend(
-        email: widget.email,
         type: OtpType.signup,
+        email: widget.email,
       );
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('E-mail reenviado com sucesso! 📩')),
+        const SnackBar(content: Text('E-mail de confirmação reenviado 📬')),
       );
     } catch (e) {
-      debugPrint('Erro ao reenviar confirmação: $e');
+      debugPrint('Erro ao reenviar e-mail: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro ao reenviar e-mail. Tente novamente. 😓')),
+        const SnackBar(content: Text('Erro ao reenviar e-mail 😕')),
       );
+    } finally {
+      if (mounted) setState(() => reenviando = false);
     }
-  }
-
-  @override
-  void dispose() {
-    _linkSub?.cancel();
-    super.dispose();
   }
 
   @override
@@ -88,7 +42,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Confirmação de E-mail ✉️'),
+        title: const Text('Confirme seu e-mail 📧'),
         centerTitle: true,
       ),
       body: Center(
@@ -117,7 +71,7 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Enviamos um link de confirmação para:\n${widget.email}\n\nClique nele para liberar o acesso.',
+                'Enviamos um link de confirmação para:\n${widget.email}',
                 style: theme.textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
@@ -133,27 +87,28 @@ class _EmailConfirmationScreenState extends State<EmailConfirmationScreen> {
                     children: [
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: _reenviarEmail,
+                        child: ElevatedButton(
+                          onPressed: reenviando ? null : _reenviarEmail,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          label: const Text(
-                            'Reenviar confirmação',
-                            style: TextStyle(fontSize: 16),
+                          child: Text(
+                            reenviando
+                                ? 'Reenviando...'
+                                : 'Reenviar e-mail de confirmação',
+                            style: const TextStyle(fontSize: 16),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/auth');
+                          Navigator.pop(context);
                         },
-                        child: const Text('Já confirmou? Ir para Login'),
+                        child: const Text('Já confirmou? Ir para login'),
                       ),
                     ],
                   ),

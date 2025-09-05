@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'firebase_options.dart';
+import 'package:app_links/app_links.dart';
+import 'dart:async';
 
 // Screens
 import 'screens/autenticacao.dart';
@@ -15,6 +17,7 @@ import 'screens/cervejeiros_amigos.dart';
 import 'screens/cervejas_amigos.dart';
 import 'screens/menu_principal.dart';
 import 'screens/notificacoes.dart';
+import 'screens/resetar_senha.dart';
 
 // Providers
 import 'services/cerveja_provider.dart';
@@ -49,6 +52,39 @@ Future<void> _initNotifications() async {
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(kChannel);
+}
+
+Future<void> handleIncomingLinkGlobal(Uri? uri) async {
+  if (uri == null || uri.queryParameters['code'] == null) return;
+
+  final supabase = Supabase.instance.client;
+  final code = uri.queryParameters['code']!;
+  final res = await supabase.auth.exchangeCodeForSession(code);
+
+  if (res.session != null) {
+    if (uri.host == 'login-callback') {
+      await supabase.auth.signOut();
+
+      final ctx = navigatorKey.currentContext;
+      if (ctx != null) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          const SnackBar(
+            content: Text('✅ E-mail confirmado com sucesso!'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
+      await Future.delayed(const Duration(seconds: 3));
+      navigatorKey.currentState?.pushNamedAndRemoveUntil('/auth', (_) => false);
+
+    } else if (uri.host == 'reset-password') {
+      navigatorKey.currentState?.pushNamedAndRemoveUntil(
+        '/reset-password',
+        (_) => false,
+      );
+    }
+  }
 }
 
 Future<void> abrirTelaPorNotificacao({
@@ -169,6 +205,21 @@ Future<void> main() async {
   final temaProvider = TemaProvider();
   await temaProvider.carregarTemaSalvo();
 
+  final appLinks = AppLinks();
+
+  // App fechado
+  final initialUri = await appLinks.getInitialAppLink();
+  if (initialUri != null) {
+    handleIncomingLinkGlobal(initialUri);
+  }
+
+  // App aberto
+  appLinks.uriLinkStream.listen((uri) {
+    if (uri != null) {
+      handleIncomingLinkGlobal(uri);
+    }
+  });
+
   runApp(
     MultiProvider(
       providers: [
@@ -215,6 +266,7 @@ class BrewTradeApp extends StatelessWidget {
                   idUsuarioLogado: user?.id ?? '',
                 );
               },
+            '/reset-password': (_) => const ResetPasswordScreen(),
           },
           onGenerateRoute: (settings) {
             if (settings.name == '/cadastroCerveja' &&

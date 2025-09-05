@@ -22,8 +22,8 @@ class Cervejeiro {
     this.cidade,
     this.cervejaria,
     this.telefone,
-    this.permiteNotificacoes = false,
-    this.visivelPesquisa = false,
+    this.permiteNotificacoes = true,
+    this.visivelPesquisa = true,
     this.redeSocial,
   });
 
@@ -38,8 +38,8 @@ class Cervejeiro {
       cidade: map['cidade'],
       cervejaria: map['cervejaria'],
       telefone: map['telefone'],
-      permiteNotificacoes: map['permite_notificacoes'] ?? false,
-      visivelPesquisa: map['visivel_pesquisa'] ?? false,
+      permiteNotificacoes: map['permite_notificacoes'] ?? true,
+      visivelPesquisa: map['visivel_pesquisa'] ?? true,
       redeSocial: map['rede_social'],
     );
   }

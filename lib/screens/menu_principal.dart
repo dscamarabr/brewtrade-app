@@ -18,6 +18,7 @@ import '../screens/cervejas_amigos.dart';
 import '../screens/notificacoes.dart';
 import '../screens/doacao.dart';
 import '../screens/contato.dart';
+import '../screens/contato_admin.dart';
 import '../screens/quem_somos.dart';
 
 class MenuPrincipal extends StatefulWidget {
@@ -322,6 +323,9 @@ class MenuPrincipalState extends State<MenuPrincipal> {
                                   // Fecha o diálogo antes do await
                                   Navigator.of(dialogContext).pop();
 
+                                  // Limpa dados locais antes de sair
+                                  context.read<PerfilProvider>().limparPerfil();
+
                                   await Supabase.instance.client.auth.signOut();
 
                                   if (!mounted) return;
@@ -426,32 +430,66 @@ class MenuPrincipalState extends State<MenuPrincipal> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: SafeArea(child: _buildBody()),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        selectedItemColor: Colors.grey,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.push(context, MaterialPageRoute(builder: (_) => TelaDoacao()));
-              break;
-            case 1:
-              Navigator.push(context, MaterialPageRoute(builder: (_) => TelaContato()));
-              break;
-            case 2:
-              Navigator.push(context, MaterialPageRoute(builder: (_) => TelaQuemSomos()));
-              break;
+      bottomNavigationBar: Builder(
+        builder: (context) {
+          final perfil = context.watch<PerfilProvider>();
+
+          // monta a lista base
+          final items = <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.volunteer_activism),
+              label: 'Doação',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.contact_mail),
+              label: 'Contato',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.info_outline),
+              label: 'Quem Somos',
+            ),
+          ];
+
+          // adiciona o Contato Admin se for admin
+          if (perfil.isSuperAdmin) {
+            items.add(
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.admin_panel_settings),
+                label: 'Contato Admin',
+              ),
+            );
           }
+
+          return BottomNavigationBar(
+            currentIndex: 0,
+            selectedItemColor: Colors.grey,
+            unselectedItemColor: Colors.grey,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            type: BottomNavigationBarType.fixed,
+            onTap: (index) {
+              switch (index) {
+                case 0:
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => TelaDoacao()));
+                  break;
+                case 1:
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => TelaContato()));
+                  break;
+                case 2:
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => TelaQuemSomos()));
+                  break;
+                case 3:
+                  if (perfil.isSuperAdmin) {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => TelaContatoAdmin()));
+                  }
+                  break;
+              }
+            },
+            items: items,
+          );
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.volunteer_activism), label: 'Doação'),
-          BottomNavigationBarItem(icon: Icon(Icons.contact_mail), label: 'Contato'),
-          BottomNavigationBarItem(icon: Icon(Icons.info_outline), label: 'Quem Somos'),
-        ],
       ),
     );
+
   }
 }

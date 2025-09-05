@@ -130,33 +130,60 @@ Deno.serve(async (req) => {
       id_notificacao
     } = record;
 
-    const supabaseRes = await fetch(`${SUPABASE_URL}/rest/v1/tb_push_tokens?user_id=eq.${id_usuario_destinatario}&ativo=eq.true`, {
-      headers: {
-        "apikey": SUPABASE_SERVICE_ROLE,
-        "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE}`,
-        "Content-Type": "application/json"
+    // 1️⃣ Buscar tokens ativos
+    const tokensRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/tb_push_tokens?user_id=eq.${id_usuario_destinatario}&ativo=eq.true&select=token,user_id`,
+      {
+        headers: {
+          "apikey": SUPABASE_SERVICE_ROLE,
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE}`,
+          "Content-Type": "application/json"
+        }
       }
-    });
+    );
 
-    const tokens = await supabaseRes.json();
-    const token = tokens[0]?.token;
+    const tokensData = await tokensRes.json();
 
-    if (!token) {
-      console.error("Token não encontrado para usuário:", id_usuario_destinatario);
+    if (!tokensData.length) {
+      console.error("Nenhum token ativo encontrado para usuário:", id_usuario_destinatario);
       return new Response(JSON.stringify({ success: false, error: "Token não encontrado" }), {
         status: 400,
         headers: { "Content-Type": "application/json" }
       });
     }
 
+    // 2️⃣ Verificar se permite notificações
+    const cervejeiroRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/tb_cervejeiro?id=eq.${tokensData[0].user_id}&select=permite_notificacoes`,
+      {
+        headers: {
+          "apikey": SUPABASE_SERVICE_ROLE,
+          "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const cervejeiroData = await cervejeiroRes.json();
+    const permiteNotificacoes = cervejeiroData[0]?.permite_notificacoes === true;
+
+    if (!permiteNotificacoes) {
+      console.log("Usuário não permite notificações");
+      return new Response(JSON.stringify({ success: false, error: "Usuário não permite notificações" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    const token = tokensData[0].token;
     const titulo = tp_notificacao;
     const corpo = record.mensagem_push ?? "Você recebeu uma nova notificação";
 
     const accessToken = await getAccessToken();
 
-    const acao = tp_notificacao === 'Cadastro Cerveja' 
+    const acao = tp_notificacao === 'Cadastro Cerveja'
       ? 'abrir_pesquisa_filtrada'
-      : 'acao_desconhecida';    
+      : 'acao_desconhecida';
 
     const fcmMessage = {
       message: {

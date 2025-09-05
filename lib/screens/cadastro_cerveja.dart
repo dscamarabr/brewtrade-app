@@ -271,7 +271,22 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
                           color: Theme.of(context).primaryColor, width: 2),
                     ),
                   ),
+                  textCapitalization: TextCapitalization.words,
                   validator: (v) => v!.isEmpty ? 'Informe o nome' : null,
+                  onChanged: (value) {
+                    final capitalizado = value
+                        .split(' ')
+                        .map((word) => word.isNotEmpty
+                            ? '${word[0].toUpperCase()}${word.substring(1)}'
+                            : '')
+                        .join(' ');
+                    if (value != capitalizado) {
+                      nomeCtrl.value = nomeCtrl.value.copyWith(
+                        text: capitalizado,
+                        selection: TextSelection.collapsed(offset: capitalizado.length),
+                      );
+                    }
+                  },                  
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -295,7 +310,22 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
                           color: Theme.of(context).primaryColor, width: 2),
                     ),
                   ),
+                  textCapitalization: TextCapitalization.words,
                   validator: (v) => v!.isEmpty ? 'Informe a cervejaria' : null,
+                  onChanged: (value) {
+                    final capitalizado = value
+                        .split(' ')
+                        .map((word) => word.isNotEmpty
+                            ? '${word[0].toUpperCase()}${word.substring(1)}'
+                            : '')
+                        .join(' ');
+                    if (value != capitalizado) {
+                      cervejariaCtrl.value = cervejariaCtrl.value.copyWith(
+                        text: capitalizado,
+                        selection: TextSelection.collapsed(offset: capitalizado.length),
+                      );
+                    }
+                  },                  
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -319,7 +349,22 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
                           color: Theme.of(context).primaryColor, width: 2),
                     ),
                   ),
+                  textCapitalization: TextCapitalization.words,
                   validator: (v) => v!.isEmpty ? 'Informe o estilo' : null,
+                  onChanged: (value) {
+                    final capitalizado = value
+                        .split(' ')
+                        .map((word) => word.isNotEmpty
+                            ? '${word[0].toUpperCase()}${word.substring(1)}'
+                            : '')
+                        .join(' ');
+                    if (value != capitalizado) {
+                      estiloCtrl.value = estiloCtrl.value.copyWith(
+                        text: capitalizado,
+                        selection: TextSelection.collapsed(offset: capitalizado.length),
+                      );
+                    }
+                  },                  
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -469,6 +514,18 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
                     ),
                   ),
                   maxLines: 3,
+                  textCapitalization: TextCapitalization.sentences,
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                      final capitalizado = value[0].toUpperCase() + value.substring(1);
+                      if (value != capitalizado) {
+                        descricaoCtrl.value = descricaoCtrl.value.copyWith(
+                          text: capitalizado,
+                          selection: TextSelection.collapsed(offset: capitalizado.length),
+                        );
+                      }
+                    }
+                  },                  
                 ),
                 const SizedBox(height: 16),
                 Text(

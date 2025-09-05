@@ -1,4 +1,4 @@
-package com.example.brewtrade_app
+package br.com.brewtrade
 
 import io.flutter.embedding.android.FlutterActivity
 

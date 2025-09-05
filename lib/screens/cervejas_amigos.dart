@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 import '../services/cerveja_amigos_provider.dart';
 import 'detalhe_cervejas_amigos.dart';
@@ -170,6 +171,15 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
                                         color: Theme.of(context).colorScheme.primary,
                                       ),
                                     ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Cadastrada em  ${DateFormat('dd/MM/yyyy').format(cerveja.data_cadastro)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ),
                                     const SizedBox(height: 6),
                                     Wrap(
                                       spacing: 8,
@@ -227,7 +237,7 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
       icon: const Icon(Icons.sort),
       onSelected: provider.atualizarOrdenacao,
       itemBuilder: (_) =>
-          ['Nome', 'Estilo', 'ABV', 'Cervejeiro'].map((ord) => PopupMenuItem(value: ord, child: Text(ord))).toList(),
+          ['Nome', 'Estilo', 'ABV', 'Cervejeiro','Data'].map((ord) => PopupMenuItem(value: ord, child: Text(ord))).toList(),
     );
   }
 

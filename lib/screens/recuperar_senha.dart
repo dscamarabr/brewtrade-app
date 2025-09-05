@@ -35,7 +35,10 @@ class _RecuperarSenhaScreenState extends State<RecuperarSenhaScreen> {
     }
 
     try {
-      await Supabase.instance.client.auth.resetPasswordForEmail(email);
+      await Supabase.instance.client.auth.resetPasswordForEmail(
+        email,
+        redirectTo: 'meuapp://reset-password',
+      );
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -77,13 +80,12 @@ class _RecuperarSenhaScreenState extends State<RecuperarSenhaScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 🖼 Imagem no topo (mesma proporção da tela de login)
               SizedBox(
                 height: 200, // ou 150, para seguir o login à risca
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.asset(
-                    'assets/recuperar_senha.png', // coloque sua imagem aqui
+                    'assets/recuperar_senha.png',
                     fit: BoxFit.contain,
                   ),
                 ),

@@ -9,11 +9,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'package:provider/provider.dart';
 
 import 'package:brewtrade_app/widgets/CustomEmailField.dart';
 import 'package:brewtrade_app/screens/confirmacao_email.dart';
 import 'package:brewtrade_app/screens/menu_principal.dart';
 import 'package:brewtrade_app/screens/recuperar_senha.dart';
+import 'package:brewtrade_app/services/perfil_provider.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -210,6 +212,22 @@ class _AuthScreenState extends State<AuthScreen> {
           setState(() => loading = false);
         }
         return;
+      }
+
+      // Consulta o campo is_super_admin na tabela auth.users
+      final response = await Supabase.instance.client
+          .from('user_admin_status') // ou a view que expõe auth.users
+          .select('is_super_admin')
+          .eq('id', user.id)
+          .maybeSingle();
+
+      final bool isAdmin = response != null && response['is_super_admin'] == true;
+
+      // Aqui você pode salvar no PerfilProvider
+      if (mounted) {
+        context.read<PerfilProvider>().atualizarPerfil({
+          'is_super_admin': isAdmin,
+        });
       }
 
       // 1) Garante permissão de push

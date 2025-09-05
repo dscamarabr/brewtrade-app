@@ -11,8 +11,9 @@ class PerfilProvider with ChangeNotifier {
   String? _cervejaria;
   String? _bio;
   String? _redeSocial;
-  bool _permiteNotificacoes = false;
+  bool _permiteNotificacoes = true;
   bool _visivelPesquisa = true;
+  bool _isSuperAdmin = false;
 
   // Getters
   String? get id => _id;
@@ -26,6 +27,7 @@ class PerfilProvider with ChangeNotifier {
   String? get redeSocial => _redeSocial;
   bool get permiteNotificacoes => _permiteNotificacoes;
   bool get visivelPesquisa => _visivelPesquisa;
+  bool get isSuperAdmin => _isSuperAdmin;
 
   // Atualiza perfil completo
   void atualizarPerfil(Map<String, dynamic> dados) {
@@ -41,6 +43,7 @@ class PerfilProvider with ChangeNotifier {
     _redeSocial = dados['rede_social'] ?? _redeSocial;
     _permiteNotificacoes = dados['permite_notificacoes'] ?? _permiteNotificacoes;
     _visivelPesquisa = dados['visivel_pesquisa'] ?? _visivelPesquisa;
+    _isSuperAdmin = dados['is_super_admin'] ?? _isSuperAdmin;
 
     notifyListeners();
   }
@@ -109,8 +112,9 @@ class PerfilProvider with ChangeNotifier {
     _cervejaria = null;
     _bio = null;
     _redeSocial = null;
-    _permiteNotificacoes = false;
+    _permiteNotificacoes = true;
     _visivelPesquisa = true;
+    _isSuperAdmin = false;
     notifyListeners();
   }
 }
