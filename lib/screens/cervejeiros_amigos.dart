@@ -23,6 +23,11 @@ class ExplorarCervejeirosScreen extends StatefulWidget {
 }
 
 class _ExplorarCervejeirosScreenState extends State<ExplorarCervejeirosScreen> {
+  String filtroStatus = 'Todos';
+  bool expandirEmBusca = true;
+
+  final opcoesFiltroStatus = ['Todos', 'Em Busca de Conexão', 'Amigos'];
+
   @override
   void initState() {
     super.initState();
@@ -76,7 +81,6 @@ class _ExplorarCervejeirosScreenState extends State<ExplorarCervejeirosScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<CervejeiroProvider>();
     final lista = provider.cervejeirosFiltradosOrdenados;
-    //final lista = <Cervejeiro>[];  // Pra testar tela vazia
 
     return Scaffold(
       appBar: AppBar(
@@ -91,64 +95,109 @@ class _ExplorarCervejeirosScreenState extends State<ExplorarCervejeirosScreen> {
             }
           },
         ),
-        actions: [_menuFiltroEstado(context)],
+        actions: [
+          _menuFiltroStatus(context),
+          _menuFiltroEstado(context),
+        ],
       ),
       body: lista.isEmpty
           ? _telaVazia()
-          : ListView(
-              children: agruparCervejeiros(provider).entries
-                  .where((entry) => entry.value.isNotEmpty)
-                  .map((entry) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: (entry.key == 'Amigos'
-                                      ? Colors.green.shade600
-                                      : Colors.grey.shade700)
-                                  .withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
+          : Column(
+              children: [
+                // Lista filtrada
+                Expanded(
+                  child: ListView(
+                    children: agruparCervejeiros(provider).entries
+                        .where((entry) {
+                          if (filtroStatus == 'Todos') {
+                            return entry.value.isNotEmpty;
+                          }
+                          return entry.key == filtroStatus &&
+                              entry.value.isNotEmpty;
+                        })
+                        .map((entry) {
+                          final titulo = entry.key;
+                          final listaCervejeiros = entry.value;
+
+                          if (titulo == 'Em Busca de Conexão') {
+                            return ExpansionTile(
+                              title: Row(
+                                children: [
+                                  Icon(Icons.person_add_alt,
+                                      color: Colors.grey.shade800, size: 20),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    titulo,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              initiallyExpanded: expandirEmBusca,
+                              onExpansionChanged: (expanded) {
+                                setState(() => expandirEmBusca = expanded);
+                              },
+                              children: listaCervejeiros
+                                  .map((c) => Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12),
+                                        child: _cardCervejeiro(c, provider),
+                                      ))
+                                  .toList(),
+                            );
+                          } else {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  entry.key == 'Amigos'
-                                      ? Icons.group
-                                      : Icons.person_add_alt,
-                                  color: entry.key == 'Amigos'
-                                      ? Colors.green.shade800
-                                      : Colors.grey.shade800,
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  entry.key,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade600
+                                        .withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.group,
+                                          color: Colors.green.shade800,
+                                          size: 20),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        titulo,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
+                                    ],
+                                  ),
                                 ),
+                                ...listaCervejeiros.map(
+                                  (c) => Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12),
+                                    child: _cardCervejeiro(c, provider),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
                               ],
-                            ),
-                          ),
-                          ...entry.value.map(
-                            (c) => Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              child: _cardCervejeiro(c, provider),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                      ))
-                  .toList(),
+                            );
+                          }
+                        })
+                        .toList(),
+                  ),
+                ),
+              ],
             ),
     );
   }
@@ -464,4 +513,20 @@ class _ExplorarCervejeirosScreenState extends State<ExplorarCervejeirosScreen> {
       ],
     );
   }
+
+  Widget _menuFiltroStatus(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.filter_list_alt), // ícone do filtro de status
+      onSelected: (val) {
+        setState(() => filtroStatus = val);
+      },
+      itemBuilder: (_) => opcoesFiltroStatus
+          .map((status) => PopupMenuItem(
+                value: status,
+                child: Text(status),
+              ))
+          .toList(),
+    );
+  }
+
 }

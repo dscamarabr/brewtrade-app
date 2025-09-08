@@ -7,6 +7,7 @@ import '/models/cerveja.dart';
 import '../services/cerveja_provider.dart';
 import 'cadastro_cerveja.dart';
 import 'menu_principal.dart';
+import 'tela_base.dart';
 
 class TelaListaCervejas extends StatelessWidget {
   const TelaListaCervejas({super.key});
@@ -16,30 +17,36 @@ class TelaListaCervejas extends StatelessWidget {
     final cervejaProvider = Provider.of<CervejaProvider>(context);
     final temCervejas = cervejaProvider.cervejas.isNotEmpty;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Minhas Cervejas'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            final parentState =
-                context.findAncestorStateOfType<MenuPrincipalState>();
-            parentState?.voltarParaMenu();
-          },
+    return TelaBase(
+      onVoltar: () {
+        final parentState = context.findAncestorStateOfType<MenuPrincipalState>();
+        parentState?.voltarParaMenu();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Minhas Cervejas'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              final parentState = context.findAncestorStateOfType<MenuPrincipalState>();
+              parentState?.voltarParaMenu();
+            },
+          ),
+          actions: temCervejas
+              ? [
+                  _menuFiltroEstilo(context),
+                  _menuOrdenacao(context),
+                ]
+              : [],
         ),
-        actions: temCervejas
-            ? [
-                _menuFiltroEstilo(context),
-                _menuOrdenacao(context),
-              ]
-            : [],
-      ),
-      body: SafeArea(
-        child: temCervejas
-            ? _listaAgrupada(context, cervejaProvider)
-            : _telaVaziaCentralizada(context),
+        body: SafeArea(
+          child: temCervejas
+              ? _listaAgrupada(context, cervejaProvider)
+              : _telaVaziaCentralizada(context),
+        ),
       ),
     );
+
   }
 
   Map<String, List<Cerveja>> agruparPorSituacaoOrdenada(

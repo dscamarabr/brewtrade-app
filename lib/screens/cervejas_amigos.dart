@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../services/cerveja_amigos_provider.dart';
 import 'detalhe_cervejas_amigos.dart';
+import 'tela_base.dart';
 
 class TelaCervejasAmigos extends StatefulWidget {
   final String? idCervejeiro;
@@ -87,7 +88,9 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
 
     final temCervejas = provider.cervejasFiltradas.isNotEmpty;
 
-    return Scaffold(
+  return TelaBase(
+    onVoltar: _voltar, // agora o botão físico chama o mesmo método do AppBar
+    child: Scaffold(
       appBar: AppBar(
         title: const Text('Cervejas dos Amigos'),
         leading: IconButton(
@@ -207,7 +210,8 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
               )
             : _telaVazia(),
       ),
-    );
+    ),
+  );
   }
 
   Widget _telaVazia() {

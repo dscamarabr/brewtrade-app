@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../services/cerveja_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'tela_base.dart';
 
 
 class TelaCadastroCerveja extends StatefulWidget {
@@ -239,7 +240,12 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
       borderSide: BorderSide(color: Colors.grey.shade400),
     );
 
-    return Scaffold(
+  return TelaBase(
+    onVoltar: () {
+      widget.onVoltar?.call();
+      if (Navigator.canPop(context)) Navigator.pop(context);
+    },
+    child: Scaffold(
         appBar: AppBar(
           title: Text(isEditando ? 'Editar Cerveja' : 'Cadastrar Cerveja'),
           leading: IconButton(
@@ -661,25 +667,26 @@ class _TelaCadastroCervejaState extends State<TelaCadastroCerveja> {
                   onChanged: (value) => setState(() => situacao = value!),
                 ),
                 const SizedBox(height: 24),
-SizedBox(
-  width: double.infinity,
-  child: ElevatedButton.icon(
-    icon: const Icon(Icons.save),
-    label: const Text('Salvar Cerveja'),
-    style: ElevatedButton.styleFrom(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-      foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-    ),
-    onPressed: salvarCerveja,
-  ),
-),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.save),
+                    label: const Text('Salvar Cerveja'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    onPressed: salvarCerveja,
+                  ),
+                ),
               ],
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }
