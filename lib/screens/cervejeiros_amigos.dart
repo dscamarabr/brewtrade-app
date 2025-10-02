@@ -7,6 +7,7 @@ import '../services/cervejeiro_provider.dart';
 
 import 'detalhes_cervejeiro_amigo.dart';
 import 'cervejas_amigos.dart';
+import 'tela_base.dart';
 
 class ExplorarCervejeirosScreen extends StatefulWidget {
   final void Function(String idCervejeiro)? onVerCervejasDoAmigo;
@@ -82,123 +83,131 @@ class _ExplorarCervejeirosScreenState extends State<ExplorarCervejeirosScreen> {
     final provider = context.watch<CervejeiroProvider>();
     final lista = provider.cervejeirosFiltradosOrdenados;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cervejeiros Amigos'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (widget.onVoltar != null) {
-              widget.onVoltar!();
-            } else {
-              Navigator.of(context).pushReplacementNamed('/menuPrincipal');
-            }
-          },
+    return TelaBase(
+      onVoltar: () {
+        if (widget.onVoltar != null) {
+          widget.onVoltar!();
+        } else {
+          Navigator.of(context).pushReplacementNamed('/menuPrincipal');
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Cervejeiros Amigos'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (widget.onVoltar != null) {
+                widget.onVoltar!();
+              } else {
+                Navigator.of(context).pushReplacementNamed('/menuPrincipal');
+              }
+            },
+          ),
+          actions: [
+            _menuFiltroStatus(context),
+            _menuFiltroEstado(context),
+          ],
         ),
-        actions: [
-          _menuFiltroStatus(context),
-          _menuFiltroEstado(context),
-        ],
-      ),
-      body: lista.isEmpty
-          ? _telaVazia()
-          : Column(
-              children: [
-                // Lista filtrada
-                Expanded(
-                  child: ListView(
-                    children: agruparCervejeiros(provider).entries
-                        .where((entry) {
-                          if (filtroStatus == 'Todos') {
-                            return entry.value.isNotEmpty;
-                          }
-                          return entry.key == filtroStatus &&
-                              entry.value.isNotEmpty;
-                        })
-                        .map((entry) {
-                          final titulo = entry.key;
-                          final listaCervejeiros = entry.value;
+        body: lista.isEmpty
+            ? _telaVazia()
+            : Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      children: agruparCervejeiros(provider).entries
+                          .where((entry) {
+                            if (filtroStatus == 'Todos') {
+                              return entry.value.isNotEmpty;
+                            }
+                            return entry.key == filtroStatus &&
+                                entry.value.isNotEmpty;
+                          })
+                          .map((entry) {
+                            final titulo = entry.key;
+                            final listaCervejeiros = entry.value;
 
-                          if (titulo == 'Em Busca de Conexão') {
-                            return ExpansionTile(
-                              title: Row(
+                            if (titulo == 'Em Busca de Conexão') {
+                              return ExpansionTile(
+                                title: Row(
+                                  children: [
+                                    Icon(Icons.person_add_alt,
+                                        color: Colors.grey.shade800, size: 20),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      titulo,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                initiallyExpanded: expandirEmBusca,
+                                onExpansionChanged: (expanded) {
+                                  setState(() => expandirEmBusca = expanded);
+                                },
+                                children: listaCervejeiros
+                                    .map((c) => Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12),
+                                          child: _cardCervejeiro(c, provider),
+                                        ))
+                                    .toList(),
+                              );
+                            } else {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Icons.person_add_alt,
-                                      color: Colors.grey.shade800, size: 20),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    titulo,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                              initiallyExpanded: expandirEmBusca,
-                              onExpansionChanged: (expanded) {
-                                setState(() => expandirEmBusca = expanded);
-                              },
-                              children: listaCervejeiros
-                                  .map((c) => Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12),
-                                        child: _cardCervejeiro(c, provider),
-                                      ))
-                                  .toList(),
-                            );
-                          } else {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade600
-                                        .withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.group,
-                                          color: Colors.green.shade800,
-                                          size: 20),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        titulo,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                ...listaCervejeiros.map(
-                                  (c) => Padding(
+                                  Container(
+                                    width: double.infinity,
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 12),
-                                    child: _cardCervejeiro(c, provider),
+                                        horizontal: 12, vertical: 8),
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Colors.green.shade600.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(Icons.group,
+                                            color: Colors.green.shade800,
+                                            size: 20),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          titulo,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                              ],
-                            );
-                          }
-                        })
-                        .toList(),
+                                  ...listaCervejeiros.map(
+                                    (c) => Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12),
+                                      child: _cardCervejeiro(c, provider),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                ],
+                              );
+                            }
+                          })
+                          .toList(),
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 

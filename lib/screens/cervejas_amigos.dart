@@ -88,130 +88,130 @@ class _TelaCervejasAmigosState extends State<TelaCervejasAmigos> {
 
     final temCervejas = provider.cervejasFiltradas.isNotEmpty;
 
-  return TelaBase(
-    onVoltar: _voltar, // agora o botão físico chama o mesmo método do AppBar
-    child: Scaffold(
-      appBar: AppBar(
-        title: const Text('Cervejas dos Amigos'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _voltar,
+    return TelaBase(
+      onVoltar: _voltar, // agora o botão físico chama o mesmo método do AppBar
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Cervejas dos Amigos'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _voltar,
+          ),
+          actions: temCervejas
+              ? [
+                  _menuFiltroEstilo(context),
+                  _menuFiltroCervejeiro(context),
+                  _menuOrdenacao(context),
+                ]
+              : [],
         ),
-        actions: temCervejas
-            ? [
-                _menuFiltroEstilo(context),
-                _menuFiltroCervejeiro(context),
-                _menuOrdenacao(context),
-              ]
-            : [],
-      ),
-      body: SafeArea(
-        child: temCervejas
-            ? ListView.builder(
-                itemCount: provider.cervejasFiltradas.length,
-                itemBuilder: (context, index) {
-                  final cerveja = provider.cervejasFiltradas[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 4,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => TelaDetalhesCerveja(cerveja: cerveja),
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              cerveja.imagens?.isNotEmpty == true
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        cerveja.imagens!.first,
-                                        width: 70,
-                                        height: 70,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return const Icon(Icons.broken_image, size: 48);
-                                        },
-                                      ),
-                                    )
-                                  : SvgPicture.asset(
-                                      'assets/icons/garrafa_cerveja.svg',
-                                      width: 56,
-                                      height: 56,
-                                      colorFilter: const ColorFilter.mode(
-                                        Colors.brown,
-                                        BlendMode.srcIn,
-                                      ),
-                                    ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      cerveja.nome,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Cervejeiro: ${cerveja.descricao ?? 'Desconhecido'}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Cadastrada em  ${DateFormat('dd/MM/yyyy').format(cerveja.data_cadastro)}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Wrap(
-                                      spacing: 8,
-                                      children: [
-                                        Chip(
-                                          label: Text(cerveja.estilo),
-                                          backgroundColor: Colors.orange.withOpacity(0.1),
-                                        ),
-                                        Chip(
-                                          label: Text('${cerveja.abv.toStringAsFixed(1)}% ABV'),
-                                          backgroundColor: Colors.blue.withOpacity(0.1),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+        body: SafeArea(
+          child: temCervejas
+              ? ListView.builder(
+                  itemCount: provider.cervejasFiltradas.length,
+                  itemBuilder: (context, index) {
+                    final cerveja = provider.cervejasFiltradas[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      child: Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 4,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => TelaDetalhesCerveja(cerveja: cerveja),
                               ),
-                            ],
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                cerveja.imagens?.isNotEmpty == true
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.network(
+                                          cerveja.imagens!.first,
+                                          width: 70,
+                                          height: 70,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return const Icon(Icons.broken_image, size: 48);
+                                          },
+                                        ),
+                                      )
+                                    : SvgPicture.asset(
+                                        'assets/icons/garrafa_cerveja.svg',
+                                        width: 56,
+                                        height: 56,
+                                        colorFilter: const ColorFilter.mode(
+                                          Colors.brown,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        cerveja.nome,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Cervejeiro: ${cerveja.descricao ?? 'Desconhecido'}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Cadastrada em  ${DateFormat('dd/MM/yyyy').format(cerveja.data_cadastro)}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Wrap(
+                                        spacing: 8,
+                                        children: [
+                                          Chip(
+                                            label: Text(cerveja.estilo),
+                                            backgroundColor: Colors.orange.withOpacity(0.1),
+                                          ),
+                                          Chip(
+                                            label: Text('${cerveja.abv.toStringAsFixed(1)}% ABV'),
+                                            backgroundColor: Colors.blue.withOpacity(0.1),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              )
-            : _telaVazia(),
+                    );
+                  },
+                )
+              : _telaVazia(),
+        ),
       ),
-    ),
-  );
+    );
   }
 
   Widget _telaVazia() {

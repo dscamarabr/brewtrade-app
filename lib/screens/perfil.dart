@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/perfil_provider.dart';
 import '../services/tema_provider.dart';
+import 'tela_base.dart';
 
 class PerfilScreen extends StatefulWidget {
   final void Function()? onVoltar;
@@ -159,193 +160,197 @@ class _PerfilScreenState extends State<PerfilScreen> {
     final perfilProvider = context.watch<PerfilProvider>();
     final temaProvider = context.watch<TemaProvider>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil Cervejeiro 🍻'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            widget.onVoltar?.call();
-          },
+    return TelaBase(
+      onVoltar: () {
+        widget.onVoltar?.call();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Perfil Cervejeiro 🍻'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              widget.onVoltar?.call();
+            },
+          ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                controller: nomeController,
-                decoration: const InputDecoration(labelText: 'Nome'),
-                textCapitalization: TextCapitalization.words,
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Informe seu nome' : null,
-                onChanged: (value) {
-                  final capitalizado = value
-                      .split(' ')
-                      .map((word) => word.isNotEmpty
-                          ? '${word[0].toUpperCase()}${word.substring(1)}'
-                          : '')
-                      .join(' ');
-                  if (value != capitalizado) {
-                    nomeController.value = nomeController.value.copyWith(
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                TextFormField(
+                  controller: nomeController,
+                  decoration: const InputDecoration(labelText: 'Nome'),
+                  textCapitalization: TextCapitalization.words,
+                  validator: (value) =>
+                      value == null || value.isEmpty ? 'Informe seu nome' : null,
+                  onChanged: (value) {
+                    final capitalizado = value
+                        .split(' ')
+                        .map((word) => word.isNotEmpty
+                            ? '${word[0].toUpperCase()}${word.substring(1)}'
+                            : '')
+                        .join(' ');
+                    if (value != capitalizado) {
+                      nomeController.value = nomeController.value.copyWith(
+                        text: capitalizado,
+                        selection: TextSelection.collapsed(offset: capitalizado.length),
+                      );
+                    }
+                  },
+                ),
+                TextFormField(
+                  controller: telefoneController,
+                  decoration: const InputDecoration(labelText: 'Celular'),
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [MaskedInputFormatter('(00) 00000-0000')],
+                  validator: validarTelefone,
+                ),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Estado'),
+                  value: estadoSelecionado,
+                  items: estadosValidos
+                      .map((sigla) =>
+                          DropdownMenuItem(value: sigla, child: Text(sigla)))
+                      .toList(),
+                  onChanged: (value) => setState(() {
+                    estadoSelecionado = value;
+                  }),
+                  validator: validarEstado,
+                ),
+                TextFormField(
+                  controller: cidadeController,
+                  decoration: const InputDecoration(labelText: 'Cidade'),
+                  textCapitalization: TextCapitalization.words,
+                  onChanged: (value) {
+                    final capitalizado = value
+                        .split(' ')
+                        .map((word) => word.isNotEmpty
+                            ? '${word[0].toUpperCase()}${word.substring(1)}'
+                            : '')
+                        .join(' ');
+                    if (value != capitalizado) {
+                      cidadeController.value = cidadeController.value.copyWith(
+                        text: capitalizado,
+                        selection: TextSelection.collapsed(offset: capitalizado.length),
+                      );
+                    }
+                  },
+                ),
+                TextFormField(
+                  controller: cervejariaController,
+                  decoration: const InputDecoration(labelText: 'Cervejaria'),
+                  textCapitalization: TextCapitalization.words,
+                  onChanged: (value) {
+                    final capitalizado = value
+                        .split(' ')
+                        .map((word) => word.isNotEmpty
+                            ? '${word[0].toUpperCase()}${word.substring(1)}'
+                            : '')
+                        .join(' ');
+                    if (value != capitalizado) {
+                      cervejariaController.value = cervejariaController.value.copyWith(
+                        text: capitalizado,
+                        selection: TextSelection.collapsed(offset: capitalizado.length),
+                      );
+                    }
+                  },
+                ),
+                TextFormField(
+                  controller: redeSocialController,
+                  decoration: InputDecoration(labelText: 'Perfil Instagram'),
+                ),
+                TextFormField(
+                  controller: bioController,
+                  decoration: InputDecoration(labelText: 'Bio'),
+                  maxLines: 2,
+                  textCapitalization: TextCapitalization.sentences,
+                  onChanged: (value) {
+                    if (value.isNotEmpty) {
+                    final capitalizado = value[0].toUpperCase() + value.substring(1);
+                    if (value != capitalizado) {
+                      bioController.value = bioController.value.copyWith(
                       text: capitalizado,
                       selection: TextSelection.collapsed(offset: capitalizado.length),
-                    );
-                  }
-                },
-              ),
-              TextFormField(
-                controller: telefoneController,
-                decoration: const InputDecoration(labelText: 'Celular'),
-                keyboardType: TextInputType.phone,
-                inputFormatters: [MaskedInputFormatter('(00) 00000-0000')],
-                validator: validarTelefone,
-              ),
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Estado'),
-                value: estadoSelecionado,
-                items: estadosValidos
-                    .map((sigla) =>
-                        DropdownMenuItem(value: sigla, child: Text(sigla)))
-                    .toList(),
-                onChanged: (value) => setState(() {
-                  estadoSelecionado = value;
-                }),
-                validator: validarEstado,
-              ),
-              TextFormField(
-                controller: cidadeController,
-                decoration: const InputDecoration(labelText: 'Cidade'),
-                textCapitalization: TextCapitalization.words,
-                onChanged: (value) {
-                  final capitalizado = value
-                      .split(' ')
-                      .map((word) => word.isNotEmpty
-                          ? '${word[0].toUpperCase()}${word.substring(1)}'
-                          : '')
-                      .join(' ');
-                  if (value != capitalizado) {
-                    cidadeController.value = cidadeController.value.copyWith(
-                      text: capitalizado,
-                      selection: TextSelection.collapsed(offset: capitalizado.length),
-                    );
-                  }
-                },
-              ),
-              TextFormField(
-                controller: cervejariaController,
-                decoration: const InputDecoration(labelText: 'Cervejaria'),
-                textCapitalization: TextCapitalization.words,
-                onChanged: (value) {
-                  final capitalizado = value
-                      .split(' ')
-                      .map((word) => word.isNotEmpty
-                          ? '${word[0].toUpperCase()}${word.substring(1)}'
-                          : '')
-                      .join(' ');
-                  if (value != capitalizado) {
-                    cervejariaController.value = cervejariaController.value.copyWith(
-                      text: capitalizado,
-                      selection: TextSelection.collapsed(offset: capitalizado.length),
-                    );
-                  }
-                },
-              ),
-              TextFormField(
-                controller: redeSocialController,
-                decoration: InputDecoration(labelText: 'Perfil Instagram'),
-              ),
-              TextFormField(
-                controller: bioController,
-                decoration: InputDecoration(labelText: 'Bio'),
-                maxLines: 2,
-                textCapitalization: TextCapitalization.sentences,
-                onChanged: (value) {
-                  if (value.isNotEmpty) {
-                  final capitalizado = value[0].toUpperCase() + value.substring(1);
-                  if (value != capitalizado) {
-                    bioController.value = bioController.value.copyWith(
-                    text: capitalizado,
-                    selection: TextSelection.collapsed(offset: capitalizado.length),
-                    );
-                  }
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                margin: const EdgeInsets.symmetric(vertical: 16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Foto de Perfil',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 12),
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12), // leve arredondamento
-                              image: DecorationImage(
-                                image: perfilProvider.fotoUrl?.isNotEmpty == true
-                                    ? NetworkImage(perfilProvider.fotoUrl!)
-                                    : const AssetImage('assets/imagem_padrao.png') as ImageProvider,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          if (perfilProvider.fotoUrl?.isNotEmpty == true)
-                            Positioned(
-                              top: -6,
-                              right: -6,
-                              child: GestureDetector(
-                                onTap: () => perfilProvider.removerFoto(),
-                                child: Container(
-                                  decoration: const BoxDecoration(
-                                    color: Colors.black54,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  padding: const EdgeInsets.all(4),
-                                  child: const Icon(Icons.close, color: Colors.white, size: 18),
+                      );
+                    }
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  margin: const EdgeInsets.symmetric(vertical: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Foto de Perfil',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12), // leve arredondamento
+                                image: DecorationImage(
+                                  image: perfilProvider.fotoUrl?.isNotEmpty == true
+                                      ? NetworkImage(perfilProvider.fotoUrl!)
+                                      : const AssetImage('assets/imagem_padrao.png') as ImageProvider,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
                             ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      TextButton.icon(
-                        onPressed: () async {
-                          final url = await _selecionarImagem();
-                          if (url != null) {
-                            perfilProvider.atualizarFoto(url);
-                            final userId = Supabase.instance.client.auth.currentUser?.id;
-                            if (userId != null) {
-                              await Supabase.instance.client
-                                  .from('tb_cervejeiro')
-                                  .update({'fotoUrl': url})
-                                  .eq('id', userId);
+                            if (perfilProvider.fotoUrl?.isNotEmpty == true)
+                              Positioned(
+                                top: -6,
+                                right: -6,
+                                child: GestureDetector(
+                                  onTap: () => perfilProvider.removerFoto(),
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(Icons.close, color: Colors.white, size: 18),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        TextButton.icon(
+                          onPressed: () async {
+                            final url = await _selecionarImagem();
+                            if (url != null) {
+                              perfilProvider.atualizarFoto(url);
+                              final userId = Supabase.instance.client.auth.currentUser?.id;
+                              if (userId != null) {
+                                await Supabase.instance.client
+                                    .from('tb_cervejeiro')
+                                    .update({'fotoUrl': url})
+                                    .eq('id', userId);
+                              }
                             }
-                          }
-                        },
-                        icon: const Icon(Icons.photo),
-                        label: const Text('Selecionar imagem'),
-                      ),
-                    ],
+                          },
+                          icon: const Icon(Icons.photo),
+                          label: const Text('Selecionar imagem'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 /*               Center(
                 child: Column(
                   children: [
@@ -425,58 +430,59 @@ class _PerfilScreenState extends State<PerfilScreen> {
                   ],
                 ),
               ), */
-              const SizedBox(height: 24),              
-              CheckboxListTile(
-                title: const Text('Receber notificações'),
-                value: perfilProvider.permiteNotificacoes,
-                onChanged: (value) {
-                  perfilProvider.atualizarPerfil({
-                    'permite_notificacoes': value ?? true,
-                  });
-                },
-              ),
-              CheckboxListTile(
-                title: const Text('Mostrar meu perfil na pesquisa'),
-                value: perfilProvider.visivelPesquisa,
-                onChanged: (value) {
-                  perfilProvider.atualizarPerfil({
-                    'visivel_pesquisa': value ?? true,
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: ElevatedButton.icon(
-          onPressed: loading ? null : _salvarOuEditarPerfil,
-          icon: loading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Icon(Icons.save_alt),
-          label: Text(
-            loading ? 'Salvando...' : 'Salvar Perfil',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green.shade600,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 24),              
+                CheckboxListTile(
+                  title: const Text('Receber notificações'),
+                  value: perfilProvider.permiteNotificacoes,
+                  onChanged: (value) {
+                    perfilProvider.atualizarPerfil({
+                      'permite_notificacoes': value ?? true,
+                    });
+                  },
+                ),
+                CheckboxListTile(
+                  title: const Text('Mostrar meu perfil na pesquisa'),
+                  value: perfilProvider.visivelPesquisa,
+                  onChanged: (value) {
+                    perfilProvider.atualizarPerfil({
+                      'visivel_pesquisa': value ?? true,
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           ),
         ),
-      ),      
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: ElevatedButton.icon(
+            onPressed: loading ? null : _salvarOuEditarPerfil,
+            icon: loading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.save_alt),
+            label: Text(
+              loading ? 'Salvando...' : 'Salvar Perfil',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green.shade600,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),   
+      ),
     );
   }
 }
